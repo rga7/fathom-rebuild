@@ -3,12 +3,15 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { HighlightType, Line, PersonId } from "@/data/types";
 import { HIGHLIGHT_TYPES } from "@/data/types";
 import { HIGHLIGHT_META } from "@/lib/highlights";
+import { useStored } from "@/lib/storage";
+import { applyVocab, vocabSegments, type VocabEntry } from "@/lib/vocab";
 import { person } from "@/data/people";
 import { activeLineIndex } from "@/lib/derive";
 import { clock } from "@/lib/format";
 import { useCopy, useToast } from "../Toaster";
 import { Avatar } from "../Avatar";
-import { IconChevronDown, IconChevronUp, IconCopy, IconPlus, IconSearch, IconX } from "../icons";
+import { IconBook, IconChevronDown, IconChevronUp, IconCopy, IconPencil, IconPlus, IconSearch, IconX } from "../icons";
+import { VocabPanel } from "./VocabPanel";
 import { usePlayer } from "../player/context";
 import { useMeeting } from "./context";
 
@@ -33,6 +36,9 @@ function findMatches(lines: { id: string; text: string }[], query: string): Matc
   return out;
 }
 
+const NO_EDITS: Record<string, string> = {};
+const NO_VOCAB: VocabEntry[] = [];
+
 const TranscriptLine = memo(function TranscriptLine({
   line,
   text,
@@ -45,6 +51,12 @@ const TranscriptLine = memo(function TranscriptLine({
   menuOpen,
   onMenu,
   onPick,
+  vocab,
+  raw,
+  edited,
+  editing,
+  onEdit,
+  onSaveEdit,
 }: {
   line: Line;
   text: string;
@@ -59,8 +71,26 @@ const TranscriptLine = memo(function TranscriptLine({
   menuOpen: boolean;
   onMenu: (lineId: string | null) => void;
   onPick: (line: Line, type: HighlightType) => void;
+  vocab: VocabEntry[];
+  /** Line text before vocabulary fixes (the viewer's edit, if any, else the original). */
+  raw: string;
+  edited: boolean;
+  editing: boolean;
+  onEdit: (lineId: string | null) => void;
+  /** null reverts to the original text. */
+  onSaveEdit: (lineId: string, text: string | null) => void;
 }) {
-  let body: React.ReactNode = text;
+  const [draft, setDraft] = useState(raw);
+  useEffect(() => setDraft(raw), [raw, editing]);
+  let body: React.ReactNode = vocabSegments(raw, vocab).map((seg, i) =>
+    seg.from ? (
+      <span key={i} title={`Heard as "${seg.from}" · fixed by your vocabulary`} className="underline decoration-accent/60 decoration-dotted underline-offset-4">
+        {seg.text}
+      </span>
+    ) : (
+      seg.text
+    ),
+  );
   if (matches.length) {
     const parts: React.ReactNode[] = [];
     let last = 0;
@@ -126,14 +156,65 @@ const TranscriptLine = memo(function TranscriptLine({
       <span className={`w-10 shrink-0 pt-[1px] text-right text-[11px] tabular-nums ${active ? "text-accent" : "text-transparent group-hover/line:text-faint"}`}>
         {clock(line.start)}
       </span>
-      <p className="min-w-0 flex-1 text-[13.5px] leading-6">{body}</p>
+      {editing ? (
+        <span className="flex min-w-0 flex-1 flex-col gap-1" onClick={(e) => e.stopPropagation()}>
+          <textarea
+            autoFocus
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) (e.preventDefault(), onSaveEdit(line.id, draft));
+              if (e.key === "Escape") (e.preventDefault(), onEdit(null));
+            }}
+            rows={2}
+            aria-label="Edit line"
+            className="w-full resize-y rounded border border-accent bg-panel-2 px-2 py-1 text-[13.5px] leading-6 outline-none"
+          />
+          <span className="flex gap-2 text-[11px]">
+            <button onClick={() => onSaveEdit(line.id, draft)} className="rounded bg-accent px-2 py-0.5 font-medium text-white">
+              Save
+            </button>
+            <button onClick={() => onEdit(null)} className="text-muted hover:text-fg">
+              Cancel
+            </button>
+            <span className="text-faint">Enter to save · Esc to cancel</span>
+          </span>
+        </span>
+      ) : (
+        <p className="min-w-0 flex-1 text-[13.5px] leading-6">
+          {body}
+          {edited && (
+            <span className="ml-1.5 inline-flex items-center gap-1 align-middle text-[11px] text-faint">
+              edited
+              <button
+                onClick={(e) => (e.stopPropagation(), onSaveEdit(line.id, null))}
+                className="text-accent hover:underline"
+                title={`Original: ${line.text}`}
+              >
+                revert
+              </button>
+            </span>
+          )}
+        </p>
+      )}
+      {canHighlight && !editing && (
+        <button
+          type="button"
+          aria-label="Edit line"
+          title="Fix this line"
+          onClick={(e) => (e.stopPropagation(), onEdit(line.id))}
+          className="shrink-0 self-start rounded p-1 text-faint opacity-0 hover:bg-white/5 hover:text-fg focus:opacity-100 group-hover/line:opacity-100"
+        >
+          <IconPencil size={13} />
+        </button>
+      )}
       {active && <span className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-accent" />}
     </div>
   );
 });
 
 export function TranscriptTab() {
-  const { meeting, seekTo, searchRef, highlights, highlightApi } = useMeeting();
+  const { meeting, seekTo, searchRef, highlights, highlightApi, shared } = useMeeting();
   const [menuFor, setMenuFor] = useState<string | null>(null);
   const copy = useCopy();
   const toast = useToast();
@@ -144,8 +225,28 @@ export function TranscriptTab() {
 
   const [speakers, setSpeakers] = useState<PersonId[]>([]);
   const lines = meeting.lines;
+  // Viewer corrections. Shared pages always show the seeded text.
+  const [storedEdits, setEdits] = useStored<Record<string, string>>(`edits:${meeting.id}`, {});
+  const [storedVocab, setVocab] = useStored<VocabEntry[]>("vocab", []);
+  const edits = shared || !storedEdits || typeof storedEdits !== "object" ? NO_EDITS : storedEdits;
+  const vocab = shared || !Array.isArray(storedVocab) ? NO_VOCAB : storedVocab;
+  const [editing, setEditing] = useState<string | null>(null);
+  const [showVocab, setShowVocab] = useState(false);
+  const onSaveEdit = useCallback(
+    (id: string, text: string | null) => {
+      setEditing(null);
+      const original = lines.find((l) => l.id === id)?.text;
+      setEdits((prev) => {
+        const next = { ...(prev ?? {}) };
+        if (text === null || text.trim() === "" || text.trim() === original) delete next[id];
+        else next[id] = text.trim();
+        return next;
+      });
+    },
+    [lines, setEdits],
+  );
   const visible = useMemo(() => (speakers.length ? lines.filter((l) => speakers.includes(l.speaker)) : lines), [lines, speakers]);
-  const display = useMemo(() => visible.map((l) => ({ id: l.id, text: l.text })), [visible]);
+  const display = useMemo(() => visible.map((l) => ({ id: l.id, text: applyVocab(edits[l.id] ?? l.text, vocab) })), [visible, edits, vocab]);
   const textById = useMemo(() => new Map(display.map((d) => [d.id, d.text])), [display]);
 
   const matches = useMemo(() => findMatches(display, query), [display, query]);
@@ -288,9 +389,20 @@ export function TranscriptTab() {
             </>
           )}
         </label>
+        {!shared && (
+          <button
+            onClick={() => setShowVocab((v) => !v)}
+            aria-expanded={showVocab}
+            title="Custom vocabulary"
+            className={`flex items-center gap-1 rounded-md border px-2 py-1.5 text-[12px] ${showVocab ? "border-accent text-fg" : "border-line text-muted hover:text-fg"}`}
+          >
+            <IconBook size={14} /> Vocabulary{vocab.length ? ` · ${vocab.length}` : ""}
+          </button>
+        )}
         <button onClick={copyAll} title="Copy transcript" aria-label="Copy transcript" className="rounded-md border border-line p-1.5 text-muted hover:text-fg">
           <IconCopy />
         </button>
+        {showVocab && !shared && <VocabPanel vocab={vocab} setVocab={setVocab} />}
         {meeting.participants.length > 1 && (
           <div className="flex w-full flex-wrap items-center gap-1.5" role="group" aria-label="Filter by speaker">
             <span className="text-[11px] uppercase tracking-wide text-faint">Speakers</span>
@@ -348,6 +460,12 @@ export function TranscriptTab() {
                   menuOpen={menuFor === l.id}
                   onMenu={setMenuFor}
                   onPick={onPick}
+                  vocab={vocab}
+                  raw={edits[l.id] ?? l.text}
+                  edited={!!edits[l.id]}
+                  editing={editing === l.id}
+                  onEdit={setEditing}
+                  onSaveEdit={onSaveEdit}
                 />
               ))}
             </div>
