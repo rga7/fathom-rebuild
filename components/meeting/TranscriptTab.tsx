@@ -142,8 +142,10 @@ export function TranscriptTab() {
   const [follow, setFollow] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
 
+  const [speakers, setSpeakers] = useState<PersonId[]>([]);
   const lines = meeting.lines;
-  const display = useMemo(() => lines.map((l) => ({ id: l.id, text: l.text })), [lines]);
+  const visible = useMemo(() => (speakers.length ? lines.filter((l) => speakers.includes(l.speaker)) : lines), [lines, speakers]);
+  const display = useMemo(() => visible.map((l) => ({ id: l.id, text: l.text })), [visible]);
   const textById = useMemo(() => new Map(display.map((d) => [d.id, d.text])), [display]);
 
   const matches = useMemo(() => findMatches(display, query), [display, query]);
@@ -238,13 +240,13 @@ export function TranscriptTab() {
 
   const turns = useMemo(() => {
     const out: { speaker: PersonId; lines: Line[] }[] = [];
-    for (const l of lines) {
+    for (const l of visible) {
       const last = out[out.length - 1];
       if (last && last.speaker === l.speaker) last.lines.push(l);
       else out.push({ speaker: l.speaker, lines: [l] });
     }
     return out;
-  }, [lines]);
+  }, [visible]);
 
   const copyAll = () =>
     copy(
@@ -289,6 +291,36 @@ export function TranscriptTab() {
         <button onClick={copyAll} title="Copy transcript" aria-label="Copy transcript" className="rounded-md border border-line p-1.5 text-muted hover:text-fg">
           <IconCopy />
         </button>
+        {meeting.participants.length > 1 && (
+          <div className="flex w-full flex-wrap items-center gap-1.5" role="group" aria-label="Filter by speaker">
+            <span className="text-[11px] uppercase tracking-wide text-faint">Speakers</span>
+            <button
+              onClick={() => setSpeakers([])}
+              className={`rounded-full border px-2 py-0.5 text-[12px] ${speakers.length ? "border-line text-muted hover:text-fg" : "border-accent bg-accent/15 text-fg"}`}
+            >
+              All
+            </button>
+            {meeting.participants.map((p) => {
+              const on = speakers.includes(p);
+              return (
+                <button
+                  key={p}
+                  aria-pressed={on}
+                  onClick={() => setSpeakers((cur) => (on ? cur.filter((x) => x !== p) : [...cur, p]))}
+                  className={`flex items-center gap-1 rounded-full border py-0.5 pl-0.5 pr-2 text-[12px] ${on ? "border-accent bg-accent/15 text-fg" : "border-line text-muted hover:text-fg"}`}
+                >
+                  <Avatar id={p} size={16} title={false} />
+                  {person(p).name.split(" ")[0]}
+                </button>
+              );
+            })}
+            {speakers.length > 0 && (
+              <span className="text-[11px] text-faint">
+                {visible.length} of {lines.length} lines
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">

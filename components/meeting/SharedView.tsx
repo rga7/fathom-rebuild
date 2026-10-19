@@ -19,6 +19,7 @@ import { FollowUpEmailButton } from "./FollowUpEmail";
 import { SendToMenu } from "./SendToMenu";
 import { shareUrl } from "./ShareControls";
 import { SummaryTab } from "./SummaryTab";
+import { MeetingInsights } from "./MeetingInsights";
 import { TranscriptTab } from "./TranscriptTab";
 import { useKeyboard } from "./useKeyboard";
 
@@ -170,7 +171,11 @@ function Inner({ meeting, sharePath, clip }: { meeting: Meeting; sharePath: stri
               ))}
             </div>
             <div className={`min-h-0 flex-1 overflow-y-auto ${tab === "ask" ? "flex flex-col p-3" : "p-4"}`} id="tab-scroll">
-              {tab === "summary" && <SummaryTab />}
+              {tab === "summary" && (
+                <SummaryTab>
+                  <MeetingInsights />
+                </SummaryTab>
+              )}
               {tab === "transcript" && <TranscriptTab />}
               {tab === "ask" && <AskPanel current={meeting} prompts={meeting.suggestedPrompts} scopes={["this"]} onSeek={seekTo} className="min-h-[60vh] flex-1 border-0" />}
             </div>

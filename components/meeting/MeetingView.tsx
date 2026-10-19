@@ -16,6 +16,7 @@ import { ActionItemsTab } from "./ActionItemsTab";
 import { MeetingContext, type TabId } from "./context";
 import { FollowUpEmailButton } from "./FollowUpEmail";
 import { HighlightsTab } from "./HighlightsTab";
+import { MeetingInsights } from "./MeetingInsights";
 import { HighlightButton, LivePanel, type Live } from "./LiveHighlight";
 import { useHighlights } from "./useHighlights";
 import { QuestionsTab } from "./QuestionsTab";
@@ -162,7 +163,11 @@ function Inner({ meeting }: { meeting: Meeting }) {
           <main className="flex min-h-[60vh] min-w-0 flex-1 flex-col rounded-xl border border-line bg-panel lg:order-1 lg:min-h-0">
             <Tabs tab={tab} setTab={setTab} counts={{ actions: meeting.actionItems.length, highlights: highlights.length, questions: meeting.questions.length }} />
             <div className="min-h-0 flex-1 overflow-y-auto p-4" id="tab-scroll">
-              {tab === "summary" && <SummaryTab />}
+              {tab === "summary" && (
+                <SummaryTab>
+                  <MeetingInsights />
+                </SummaryTab>
+              )}
               {tab === "actions" && <ActionItemsTab />}
               {tab === "transcript" && <TranscriptTab />}
               {tab === "highlights" && <HighlightsTab />}
