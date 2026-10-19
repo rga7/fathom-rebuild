@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CAPTURE_OPTIONS, TRANSCRIPT_ONLY_SAMPLE } from "@/lib/capture";
 import { useCaptureMode } from "@/lib/captureMode";
 import { FLAGSHIP_HREF, meetingHref } from "@/lib/links";
+import { NextChip } from "./calendar/NextChip";
 import { IconCheck, IconGear, IconLogo, IconRecord } from "./icons";
 import { Modal } from "./Modal";
 
@@ -76,7 +77,8 @@ export function AppHeader({ title }: { title?: string }) {
         <Brand />
         {title && <span className="hidden truncate text-muted sm:inline">/ {title}</span>}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
+        <NextChip />
         <span className="hidden rounded-full border border-line px-2 py-0.5 text-[11px] text-faint md:inline" title="No auth in this demo. You are viewing as Jordan Lee.">
           Demo · viewing as Jordan Lee
         </span>

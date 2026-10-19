@@ -4,6 +4,7 @@ import { durationSec } from "@/lib/derive";
 import { dayHeading, dayKey, timeOfDay } from "@/lib/format";
 import { AppHeader } from "@/components/AppHeader";
 import { MeetingsList, type ListItem } from "@/components/MeetingsList";
+import { Upcoming } from "@/components/calendar/Upcoming";
 import { AskPanel } from "@/components/AskPanel";
 
 export default function Home() {
@@ -32,7 +33,7 @@ export default function Home() {
     <div className="flex h-dvh flex-col">
       <AppHeader title="My meetings" />
       <div className="flex min-h-0 flex-1">
-        <MeetingsList items={items} />
+        <MeetingsList items={items} upcoming={<Upcoming />} />
         <aside className="hidden w-[380px] shrink-0 flex-col p-3 pl-0 lg:flex">
           <AskPanel
             prompts={["What are my action items?", "What did we decide about SOC 2?", "Which deals are blocked on SOC 2?"]}

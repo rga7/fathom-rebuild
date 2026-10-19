@@ -42,7 +42,7 @@ function Thumb({ item }: { item: ListItem }) {
   );
 }
 
-export function MeetingsList({ items }: { items: ListItem[] }) {
+export function MeetingsList({ items, upcoming }: { items: ListItem[]; upcoming?: React.ReactNode }) {
   const [query, setQuery] = useState("");
   const [who, setWho] = useState<PersonId | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -139,6 +139,8 @@ export function MeetingsList({ items }: { items: ListItem[] }) {
             {filtered.length} of {items.length} meetings
           </span>
         </div>
+
+        {upcoming}
 
         {groups.length === 0 && (
           <div className="rounded-lg border border-dashed border-line p-8 text-center text-muted">
