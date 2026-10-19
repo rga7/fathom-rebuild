@@ -63,3 +63,9 @@ What would you like me to do? If this is a test of your capture setup, it came t
 1. **Opening paste predates the hook.** The first prompt of a session was sent before the hook was active, so it never reached `UserPromptSubmit`. It was back-filled from the transcript, and the entry carries the note `captured: back-filled from transcript (hook not yet active when this prompt was sent)`.
 2. **Stop hook wrote nothing at first.** The last response of sessions 003ea970 and 6f475edb was missing from the logs.
 3. **Cause and fix.** Cause (inferred, not proven): `Stop` fires before the final assistant message is flushed to the transcript, so the script found no completed response and wrote nothing. Fix: the wait-and-poll loop described above. Evidence: in `.claude/hooks/capture-debug.log`, every `Stop` after the fix shows `waited=0.25s` with `final_assistant_text=True`, and canary sessions 3ae21351 and 661c79ef both logged their RESPONSE.
+
+## Notes on the build log
+
+- In `.agent-logs/2026-10-19_02-02-45_e343dcbc-2818-4b0d-a62f-fbe6453e024a.md`, PROMPT num=2 (2026-10-19T02:22:48Z) is not something the user typed. It is a system `<task-notification>` that Claude Code injected when a background command (a Playwright + Chromium install in the scratchpad) finished while the first build turn was still running. The capture hook logged it as a prompt.
+- The whole build ran as one long turn (first prompt 02:02:45Z, final response 02:53:22Z), so that session shows two PROMPT entries and one RESPONSE entry. Nothing was dropped and the Stop hook worked.
+- The log files are unedited. Sessions 003ea970 and 6f475edb also end without a final RESPONSE; that was the Stop-hook bug described above, fixed before the build started.
