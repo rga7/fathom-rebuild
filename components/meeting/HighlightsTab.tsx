@@ -76,7 +76,7 @@ function Row({ h }: { h: Highlight }) {
           {h.note && h.note !== h.title && <p className="mt-1 text-[12px] text-zinc-400">Note: {h.note}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-0.5 opacity-60 group-hover:opacity-100">
-          {playback && (
+          {playback && !meeting.origin && (
           <button
             onClick={() => copy(shareUrl(`/share/h/${highlightShareId(meeting, h)}`), "Highlight link copied. Opens signed out at this moment.")}
             aria-label="Copy highlight link"

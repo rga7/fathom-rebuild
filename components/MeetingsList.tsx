@@ -3,7 +3,9 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { MeetingKind, PersonId } from "@/data/types";
 import { PEOPLE } from "@/data/people";
-import { minutes } from "@/lib/format";
+import { dayHeading, dayKey, minutes, timeOfDay } from "@/lib/format";
+import { durationSec } from "@/lib/derive";
+import { useLocalMeetings, type LocalRecord } from "@/lib/localMeetings";
 import { KIND_META } from "@/lib/kinds";
 import { Avatar, AvatarStack } from "./Avatar";
 import { Menu, MenuItem, MenuLabel } from "./Menu";
@@ -21,6 +23,27 @@ export interface ListItem {
   snippet: string;
   actionCount: number;
   search: string;
+  /** Calls from simulated capture link elsewhere and carry a badge. */
+  href?: string;
+  origin?: "recording" | "simulated";
+}
+
+function localItem({ meeting: m, status }: LocalRecord): ListItem {
+  return {
+    id: m.id,
+    title: m.title,
+    kind: m.kind,
+    day: dayKey(m.startedAt),
+    dayLabel: dayHeading(m.startedAt),
+    time: timeOfDay(m.startedAt),
+    duration: durationSec(m),
+    participants: m.participants,
+    snippet: status === "recording" ? "Recording in progress. A scripted transcript is streaming in on the simulated clock." : m.snippet,
+    actionCount: status === "recording" ? 0 : m.actionItems.length,
+    search: [m.title, m.snippet, ...m.participants.map((p) => PEOPLE[p]?.name ?? p), ...m.actionItems.map((a) => a.text)].join(" ").toLowerCase(),
+    href: `/local?m=${m.id}`,
+    origin: status === "recording" ? "recording" : "simulated",
+  };
 }
 
 function Thumb({ item }: { item: ListItem }) {
@@ -37,12 +60,21 @@ function Thumb({ item }: { item: ListItem }) {
           <span key={i} className="w-[3px] rounded-full bg-white" style={{ height: h }} />
         ))}
       </div>
-      <span className="absolute bottom-1.5 right-1.5 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-medium text-white">{minutes(item.duration)}</span>
+      {item.origin === "recording" ? (
+        <span className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-md bg-red-600/90 px-1.5 py-0.5 text-[11px] font-medium text-white">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" /> Recording
+        </span>
+      ) : (
+        <span className="absolute bottom-1.5 right-1.5 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-medium text-white">{minutes(item.duration)}</span>
+      )}
     </div>
   );
 }
 
-export function MeetingsList({ items, upcoming }: { items: ListItem[]; upcoming?: React.ReactNode }) {
+export function MeetingsList({ items: seeded, upcoming }: { items: ListItem[]; upcoming?: React.ReactNode }) {
+  const [records] = useLocalMeetings();
+  // Calls made by simulated capture are newer than anything seeded, so they go on top.
+  const items = useMemo(() => [...records.map(localItem), ...seeded], [records, seeded]);
   const [query, setQuery] = useState("");
   const [who, setWho] = useState<PersonId | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -158,12 +190,17 @@ export function MeetingsList({ items, upcoming }: { items: ListItem[]; upcoming?
             <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-panel">
               {g.items.map((i) => (
                 <li key={i.id}>
-                  <Link href={`/meetings/${i.id}`} className="flex gap-4 p-3 transition-colors hover:bg-white/[0.03]">
+                  <Link href={i.href ?? `/meetings/${i.id}`} className="flex gap-4 p-3 transition-colors hover:bg-white/[0.03]">
                     <Thumb item={i} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline gap-2">
                         <h3 className="truncate text-[14px] font-semibold text-fg">{i.title}</h3>
                         <span className="shrink-0 text-[12px] text-faint">{i.time}</span>
+                        {i.origin && (
+                          <span className={`shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium ${i.origin === "recording" ? "bg-red-500/15 text-red-300" : "bg-amber-400/15 text-amber-200"}`}>
+                            {i.origin === "recording" ? "Recording (simulated)" : "Created from simulated capture · this browser only"}
+                          </span>
+                        )}
                         <span className="ml-auto shrink-0 rounded bg-raised px-1.5 py-0.5 text-[11px] text-muted sm:hidden">{minutes(i.duration)}</span>
                       </div>
                       <p className="mt-0.5 line-clamp-2 text-muted">{i.snippet}</p>

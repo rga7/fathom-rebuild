@@ -105,6 +105,8 @@ export interface Meeting {
   shareToken: string;
   title: string;
   kind: MeetingKind;
+  /** Set on calls made by the simulated capture flow. They live in one browser only and have no share links. */
+  origin?: "simulated-capture";
   /** Absent means a normal (audio) call with the simulated player. */
   capture?: CaptureMode;
   /** ISO datetime the call started. */

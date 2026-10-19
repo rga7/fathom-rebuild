@@ -32,7 +32,7 @@ function Stage({ meeting }: { meeting: Meeting }) {
         title="Simulated playback: there is no audio or video. A clock drives the transcript."
         className="absolute left-2 top-2 rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/70"
       >
-        Simulated{mode === "video" ? " · Video & Audio" : ""}
+        Simulated{(meeting.capture ?? mode) === "video" ? " · Video & Audio" : ""}
       </span>
       {chapterTitle && (
         <span className="absolute right-2 top-2 max-w-[70%] truncate rounded bg-black/50 px-1.5 py-0.5 text-[11px] text-white/80">{chapterTitle}</span>

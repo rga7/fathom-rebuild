@@ -5,6 +5,9 @@ import type { Meeting } from "@/data/types";
 import { person } from "@/data/people";
 import { SCOPE_LABEL, answerToText, ask, type Answer, type Citation, type Scope } from "@/lib/ask";
 import { meetingHref } from "@/lib/links";
+import type { LocalRecord } from "@/lib/localMeetings";
+import { LOCAL_KEY } from "@/lib/localMeetings";
+import { readStored } from "@/lib/storage";
 import { Avatar } from "./Avatar";
 import { Menu, MenuItem, MenuLabel } from "./Menu";
 import { useCopy } from "./Toaster";
@@ -14,7 +17,7 @@ import { CiteChip } from "./meeting/CiteChip";
 type Msg = { id: number; q: string; scope: Scope; answer: Answer | null };
 
 function shortTitle(t: string) {
-  return t.split(/[:(]/)[0].trim();
+  return t.split(/:\s|\s\(/)[0].trim();
 }
 
 function AnswerView({ a, current, onCite }: { a: Answer; current?: Meeting; onCite: (c: Citation) => void }) {
@@ -106,7 +109,9 @@ export function AskPanel({
     setMsgs((m) => [...m, { id, q: text, scope, answer: null }]);
     setInput("");
     // All-meeting data is a separate chunk, loaded on first broad question.
-    const all = scope === "this" && current ? [current] : (await import("@/data")).MEETINGS;
+    // Finished calls from simulated capture live in this browser's storage, so they join the broad scopes.
+    const locals = readStored<LocalRecord[]>(LOCAL_KEY, []).filter((r) => r.status === "done").map((r) => r.meeting);
+    const all = scope === "this" && current ? [current] : [...locals, ...(await import("@/data")).MEETINGS];
     const answer = ask(text, scope, current, all);
     setMsgs((m) => m.map((x) => (x.id === id ? { ...x, answer } : x)));
   };

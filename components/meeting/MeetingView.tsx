@@ -158,11 +158,22 @@ function Inner({ meeting }: { meeting: Meeting }) {
           <div className="order-2 ml-auto flex items-center gap-2 lg:order-3 lg:ml-0">
             <ShortcutsButton onClick={() => setHelp(true)} />
             <FollowUpEmailButton meeting={meeting} />
-            <ShareControls meeting={meeting} />
+            {meeting.origin ? (
+              <span className="rounded-md border border-line px-2 py-1.5 text-[12px] text-muted" title="This call exists only in this browser's storage, so there is no server copy to link to." data-testid="not-shareable">
+                Not shareable: stored in this browser only
+              </span>
+            ) : (
+              <ShareControls meeting={meeting} />
+            )}
           </div>
           {help && <ShortcutsDialog onClose={() => setHelp(false)} />}
         </header>
 
+        {meeting.origin && (
+          <div className="border-b border-line bg-panel px-4 py-1.5 text-[12px] text-muted" data-testid="origin-banner">
+            Created from simulated capture. A scripted transcript, not a real recording: nothing was recorded, and this call is stored only in this browser.
+          </div>
+        )}
         <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 lg:flex-row">
           <aside className="flex flex-col gap-3 lg:order-2 lg:w-[400px] lg:shrink-0 lg:min-h-0">
             {playback ? (

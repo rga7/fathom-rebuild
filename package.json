@@ -8,7 +8,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "seed:build": "node scripts/build-transcripts.mjs",
-    "seed:check": "node --experimental-strip-types scripts/check-seed.ts"
+    "seed:check": "node --experimental-strip-types scripts/check-seed.ts && node --experimental-strip-types scripts/check-capture.ts"
   },
   "dependencies": {
     "next": "16.4.2",
