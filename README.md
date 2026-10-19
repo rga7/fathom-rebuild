@@ -4,7 +4,7 @@ A rebuild of a Fathom-style AI meeting notetaker: meetings list, meeting page wi
 
 It is an unofficial study project, not affiliated with Fathom. Every person, company and call in it is fictional seed data.
 
-**Live:** _see the deployment section below_. It opens without a login; you view as the fixed persona "Jordan Lee".
+**Live:** https://fathom-rebuild-seven.vercel.app. It opens without a login; you view as the fixed persona "Jordan Lee". A signed-out share page: https://fathom-rebuild-seven.vercel.app/share/TF5FvWmPPxSGTH52zX4V and a clip link: https://fathom-rebuild-seven.vercel.app/share/h/hl-flag-insight
 
 ## What is real and what is stubbed
 
