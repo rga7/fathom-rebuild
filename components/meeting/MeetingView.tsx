@@ -11,7 +11,9 @@ import { PlayerProvider, usePlayerStore } from "../player/context";
 import { Player } from "../player/Player";
 import { ActionItemsTab } from "./ActionItemsTab";
 import { MeetingContext, type TabId } from "./context";
+import { FollowUpEmailButton } from "./FollowUpEmail";
 import { QuestionsTab } from "./QuestionsTab";
+import { ShareControls } from "./ShareControls";
 import { ScratchpadTab } from "./ScratchpadTab";
 import { useKeyboard } from "./useKeyboard";
 import { SummaryTab } from "./SummaryTab";
@@ -102,6 +104,8 @@ function Inner({ meeting }: { meeting: Meeting }) {
             <span className="rounded-md bg-raised px-1.5 py-0.5 text-[12px] text-muted">{minutes(durationSec(meeting))}</span>
             <AvatarStack ids={meeting.participants} max={8} size={22} />
           </div>
+          <FollowUpEmailButton meeting={meeting} />
+          <ShareControls meeting={meeting} />
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 lg:flex-row">

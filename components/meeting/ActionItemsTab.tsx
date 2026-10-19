@@ -57,7 +57,7 @@ export function ActionList({ rows, readOnly = false }: { rows: ActionRow[]; read
         return (
           <li key={r.id} className="flex gap-3 py-3" data-action={r.id}>
             {readOnly ? (
-              <span className="mt-[3px] h-4 w-4 shrink-0 rounded border border-line-2" />
+              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-faint" />
             ) : (
               <Checkbox
                 checked={isDone}
