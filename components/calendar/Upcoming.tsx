@@ -139,7 +139,13 @@ export function Upcoming() {
         <h2 className="flex items-center gap-1.5 text-[12px] font-medium text-muted">
           <IconClock size={13} /> Upcoming · next 7 days
         </h2>
-        <span className="text-[11px] text-faint">{source ? (source.kind === "demo" ? "demo calendar (simulated)" : `from ${source.name}`) : ""}</span>
+        <span className="text-[11px] text-faint">{source
+            ? source.kind === "demo"
+              ? "demo calendar (simulated)"
+              : source.kind === "feed"
+                ? `from your calendar link · synced ${new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(source.syncedAt)}`
+                : `from ${source.name}`
+            : ""}</span>
         <Link href="/settings" className="ml-auto text-[12px] text-accent hover:underline">
           Settings
         </Link>

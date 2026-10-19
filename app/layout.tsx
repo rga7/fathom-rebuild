@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { CalendarSync } from "@/components/calendar/CalendarSync";
 import { Toaster } from "@/components/Toaster";
 
 export const metadata: Metadata = {
@@ -14,7 +15,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen text-[13px] leading-5">
-        <Toaster>{children}</Toaster>
+        <Toaster>
+          <CalendarSync />
+          {children}
+        </Toaster>
       </body>
     </html>
   );

@@ -2,9 +2,9 @@
 // cancelled occurrences) expand and TZID time zones are honoured. Used by the server route for
 // private-link syncs and in the browser for .ics file imports. All-day events are skipped.
 import ICAL from "ical.js";
-import type { CalEvent, Platform } from "./calendar.ts";
+import { MAX_EVENTS, type CalEvent, type Platform } from "./calendar.ts";
 
-export const MAX_EVENTS = 200;
+export { MAX_EVENTS };
 const MAX_BYTES = 2_000_000;
 const MAX_OCCURRENCES_PER_EVENT = 6000;
 const BUDGET_MS = 4000;

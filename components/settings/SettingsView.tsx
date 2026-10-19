@@ -2,10 +2,10 @@
 import { useRef, useState } from "react";
 import { CAPTURE_OPTIONS } from "@/lib/capture";
 import { useCaptureMode } from "@/lib/captureMode";
-import { SCOPE_LABEL, type CaptureScope } from "@/lib/calendar";
-import { useCalEvents, useCalSettings, useCalSource, useOverrides } from "@/lib/calendarStore";
-import { IcsError, MAX_EVENTS, parseIcs } from "@/lib/ics";
-import { isPersisted } from "@/lib/storage";
+import { MAX_EVENTS, SCOPE_LABEL, type CaptureScope } from "@/lib/calendar";
+import { FEED_URL_KEY, useCalEvents, useCalSettings, useCalSource, useOverrides } from "@/lib/calendarStore";
+import { SYNC_ERROR_TEXT, SyncFailure, connectFeed, disconnectFeed, syncNow, useSyncState, type SyncError } from "@/lib/calendarSync";
+import { isPersisted, writeStored } from "@/lib/storage";
 import { ME_NAME } from "@/lib/calendarText";
 import { AppHeader } from "../AppHeader";
 import { Toggle } from "./Toggle";
@@ -33,10 +33,91 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 const selectCls = "rounded-md border border-line bg-panel-2 px-2 py-1.5 text-fg outline-none focus:border-accent disabled:opacity-40";
 
+const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(ms);
+
+function FeedConnect() {
+  const [url, setUrl] = useState("");
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<SyncError | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+
+  const connect = async () => {
+    setBusy(true);
+    setError(null);
+    setNote(null);
+    try {
+      const { persisted } = await connectFeed(url);
+      setUrl("");
+      if (!persisted) setNote("Browser storage is unavailable, so the link lasts only until you close the tab.");
+    } catch (e) {
+      setError(e instanceof SyncFailure ? e.code : "upstream_error");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mt-3 rounded-lg border border-line bg-panel-2 p-3" data-testid="feed-connect">
+      <h3 className="font-medium text-fg">Connect with a private calendar link</h3>
+      <details className="mt-1 text-[12px] text-muted">
+        <summary className="cursor-pointer text-accent">How to get the link</summary>
+        <ul className="mt-1 list-disc space-y-1 pl-5">
+          <li>
+            <span className="text-fg">Google Calendar:</span> Settings, pick the calendar, Integrate calendar, then copy the <em>Secret address in iCal format</em>.
+          </li>
+          <li>
+            <span className="text-fg">Outlook:</span> Settings, Calendar, Shared calendars, Publish a calendar, then copy the ICS link.
+          </li>
+          <li>
+            <span className="text-fg">Apple Calendar (iCloud):</span> share the calendar as a Public Calendar and copy its webcal:// link.
+          </li>
+        </ul>
+        <p className="mt-1">Accepted hosts: calendar.google.com, outlook.office365.com, outlook.live.com and *.icloud.com.</p>
+      </details>
+      <p className="mt-2 rounded-md bg-amber-400/10 px-2.5 py-1.5 text-[12px] text-amber-200" data-testid="feed-warning">
+        This link gives read access to your whole calendar, so treat it like a password. It is stored only in this browser and sent to this app&apos;s server on each sync;
+        the server uses it to fetch your calendar and keeps nothing (it isn&apos;t logged or stored). You can reset the link in your calendar at any time.
+      </p>
+      <form
+        className="mt-2 flex flex-wrap items-center gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (url.trim() && !busy) void connect();
+        }}
+      >
+        <input
+          aria-label="Private calendar link"
+          type={show ? "text" : "password"}
+          autoComplete="off"
+          spellCheck={false}
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="https://… or webcal://…"
+          className={`${selectCls} min-w-[240px] flex-1`}
+        />
+        <label className="flex items-center gap-1 text-[12px] text-muted">
+          <input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} /> Show
+        </label>
+        <button type="submit" disabled={!url.trim() || busy} className="rounded-md bg-accent px-3 py-1.5 font-medium text-white hover:bg-accent-2 disabled:opacity-40">
+          {busy ? "Connecting…" : "Connect"}
+        </button>
+      </form>
+      {error && (
+        <p role="alert" data-testid="feed-error" className="mt-2 rounded-md bg-red-500/10 px-2.5 py-1.5 text-red-300">
+          {SYNC_ERROR_TEXT[error]}
+        </p>
+      )}
+      {note && <p className="mt-2 text-[12px] text-muted">{note}</p>}
+    </div>
+  );
+}
+
 function CalendarSection() {
   const [source, setSource] = useCalSource();
   const [, setOverrides] = useOverrides();
   const { events } = useCalEvents();
+  const sync = useSyncState();
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -46,16 +127,21 @@ function CalendarSection() {
     setNote(null);
     if (!file) return;
     try {
-      const { events: parsed, skipped, truncated } = parseIcs(await file.text());
-      setSource({ kind: "ics", name: file.name.slice(0, 120), events: parsed, truncated });
-      setOverrides({});
-      const notes = [`Imported ${parsed.length} event${parsed.length === 1 ? "" : "s"}.`];
-      if (truncated) notes.push(`The file has more than ${MAX_EVENTS}; ${truncated} later events were left out.`);
-      if (skipped) notes.push(`${skipped} skipped (all-day, cancelled or no start time).`);
-      if (!isPersisted("cal-source")) notes.push("Browser storage is unavailable, so this import lasts only until you close the tab.");
-      setNote(notes.join(" "));
-    } catch (e) {
-      setError(e instanceof IcsError ? e.message : "Couldn't read that file.");
+      // ical.js is only loaded when someone imports a file.
+      const { parseIcs, IcsError } = await import("@/lib/ics");
+      try {
+        const { events: parsed, skipped, truncated } = parseIcs(await file.text());
+        writeStored(FEED_URL_KEY, null);
+        setSource({ kind: "ics", name: file.name.slice(0, 120), events: parsed, truncated });
+        setOverrides({});
+        const notes = [`Imported ${parsed.length} event${parsed.length === 1 ? "" : "s"} for the next 30 days.`];
+        if (truncated) notes.push(`The file has more than ${MAX_EVENTS}; ${truncated} later events were left out.`);
+        if (skipped) notes.push(`${skipped} skipped (all-day or cancelled).`);
+        if (!isPersisted("cal-source")) notes.push("Browser storage is unavailable, so this import lasts only until you close the tab.");
+        setNote(notes.join(" "));
+      } catch (e) {
+        setError(e instanceof IcsError ? e.message : "Couldn't read that file.");
+      }
     } finally {
       if (fileRef.current) fileRef.current.value = "";
     }
@@ -64,12 +150,12 @@ function CalendarSection() {
   const connectDemo = () => {
     setError(null);
     setNote(null);
+    writeStored(FEED_URL_KEY, null);
     setSource({ kind: "demo" });
     setOverrides({});
   };
   const disconnect = () => {
-    setSource(null);
-    setOverrides({});
+    disconnectFeed();
     setNote(null);
     setError(null);
   };
@@ -78,19 +164,42 @@ function CalendarSection() {
     <Section title="Calendar">
       <div className="py-2.5">
         <p className="mb-2 text-[12px] text-muted">
-          Simulated. Nothing connects to Google, Outlook or any calendar service: no sign-in, no network calls. The demo calendar is generated in this browser, and an
-          imported .ics file is parsed here and stored only in this browser.
+          Calendar events are real if you connect a private link or import a file, but capture is still simulated: nothing joins your meetings and nothing is recorded.
+          There is no sign-in with Google or Microsoft.
         </p>
         {source ? (
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-md bg-raised px-2 py-1" data-testid="cal-source">
-              {source.kind === "demo" ? "Connected: demo calendar (generated)" : `Connected: ${source.name} · ${source.events.length} events`}
-            </span>
-            {source.kind === "ics" && source.truncated > 0 && <span className="text-[12px] text-amber-300">{source.truncated} events over the {MAX_EVENTS} limit were left out</span>}
-            <span className="text-[12px] text-faint">{events.length} events</span>
-            <button onClick={disconnect} className="ml-auto rounded-md border border-line-2 px-2.5 py-1.5 text-muted hover:border-faint hover:text-fg">
-              Disconnect
-            </button>
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-md bg-raised px-2 py-1" data-testid="cal-source">
+                {source.kind === "demo"
+                  ? "Connected: demo calendar (generated)"
+                  : source.kind === "feed"
+                    ? `Connected: private calendar link (${source.host || "unknown host"}) · ${source.events.length} events in the next 7 days`
+                    : `Connected: ${source.name} · ${source.events.length} events`}
+              </span>
+              {(source.kind === "ics" || source.kind === "feed") && source.truncated > 0 && (
+                <span className="text-[12px] text-amber-300">{source.truncated} events over the {MAX_EVENTS} limit were left out</span>
+              )}
+              {source.kind === "demo" && <span className="text-[12px] text-faint">{events.length} events</span>}
+              <button onClick={disconnect} className="ml-auto rounded-md border border-line-2 px-2.5 py-1.5 text-muted hover:border-faint hover:text-fg">
+                Disconnect
+              </button>
+            </div>
+            {source.kind === "feed" && (
+              <div className="flex flex-wrap items-center gap-3 text-[12px] text-muted">
+                <span data-testid="last-synced">{sync.syncing ? "Syncing…" : `Last synced ${clock(source.syncedAt)}`}</span>
+                <button onClick={() => void syncNow({ force: true })} disabled={sync.syncing} className="rounded-md border border-line-2 px-2 py-1 text-fg hover:border-faint disabled:opacity-40">
+                  Sync now
+                </button>
+                <span className="text-faint">Also syncs on load and every 10 minutes while this tab is open.</span>
+              </div>
+            )}
+            {source.kind === "feed" && sync.error && (
+              <p role="alert" data-testid="sync-error" className="rounded-md bg-red-500/10 px-2.5 py-1.5 text-red-300">
+                {SYNC_ERROR_TEXT[sync.error]} Showing events from the last successful sync.
+              </p>
+            )}
+            {source.kind === "feed" && events.length === 0 && !sync.error && <p className="text-[12px] text-muted">No meetings in the next 7 days.</p>}
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
@@ -104,13 +213,14 @@ function CalendarSection() {
             </label>
           </div>
         )}
+        {!source && <FeedConnect />}
         {error && (
           <p role="alert" className="mt-2 rounded-md bg-red-500/10 px-2.5 py-1.5 text-red-300">
             {error}
           </p>
         )}
         {note && <p className="mt-2 text-[12px] text-muted">{note}</p>}
-        <p className="mt-2 text-[11px] text-faint">Imported times without a Z suffix are read as this browser&apos;s local time. Recurring events are not expanded.</p>
+        <p className="mt-2 text-[11px] text-faint">Times are shown in this browser&apos;s time zone. Imported files are read once; private links re-sync.</p>
       </div>
     </Section>
   );

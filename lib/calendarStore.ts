@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DEFAULT_SETTINGS, demoEvents, type CalEvent, type CalSettings, type CalSource, type Overrides } from "./calendar";
 import { useStored } from "./storage";
 
+export const FEED_URL_KEY = "cal-feed-url";
 const NO_SOURCE: CalSource | null = null;
 const NO_OVERRIDES: Overrides = {};
 
@@ -15,6 +16,10 @@ export function useCalSettings(): [CalSettings, (patch: Partial<CalSettings>) =>
   const [raw, set] = useStored<Partial<CalSettings>>("cal-settings", DEFAULT_SETTINGS);
   const settings = useMemo(() => ({ ...DEFAULT_SETTINGS, ...raw }), [raw]);
   return [settings, (patch) => set((p) => ({ ...DEFAULT_SETTINGS, ...p, ...patch }))];
+}
+/** The private calendar link. A secret: only ever in this browser's localStorage and in the body of the sync request. */
+export function useFeedUrl() {
+  return useStored<string | null>(FEED_URL_KEY, null);
 }
 export function useOverrides() {
   return useStored<Overrides>("cal-overrides", NO_OVERRIDES);

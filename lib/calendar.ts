@@ -2,6 +2,9 @@
 // calendar service: events come from a generated demo calendar or a parsed .ics file.
 import { PEOPLE } from "../data/people.ts";
 
+/** Most events kept from any one calendar source. */
+export const MAX_EVENTS = 200;
+
 export type Platform = "zoom" | "meet" | "teams";
 export type CaptureKind = "standup" | "one_on_one" | "sales" | "customer" | "planning";
 
@@ -23,7 +26,11 @@ export interface CalEvent {
   kind?: CaptureKind;
 }
 
-export type CalSource = { kind: "demo" } | { kind: "ics"; name: string; events: CalEvent[]; truncated: number };
+export type CalSource =
+  | { kind: "demo" }
+  | { kind: "ics"; name: string; events: CalEvent[]; truncated: number }
+  /** Synced from a private calendar link. The link itself is kept separately (key "cal-feed-url"), never in here. */
+  | { kind: "feed"; host: string; events: CalEvent[]; syncedAt: number; truncated: number };
 
 export type CaptureScope = "all" | "external" | "organized" | "none";
 
