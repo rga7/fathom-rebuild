@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Meeting } from "@/data/types";
 import { person } from "@/data/people";
 import { parseMentions } from "@/lib/scratchpad";
@@ -44,6 +44,14 @@ export function ScratchpadTab() {
   const ref = useRef<HTMLTextAreaElement>(null);
   const [mention, setMention] = useState<{ query: string; at: number } | null>(null);
   const [sel, setSel] = useState(0);
+  // Caret position to restore after inserting a mention. Applied in a layout
+  // effect so it lands before the next keystroke, not a frame later.
+  const pendingCaret = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    if (pendingCaret.current === null || !ref.current) return;
+    ref.current.setSelectionRange(pendingCaret.current, pendingCaret.current);
+    pendingCaret.current = null;
+  }, [text]);
 
   const options = useMemo(() => {
     if (!mention) return [];
@@ -64,8 +72,7 @@ export function ScratchpadTab() {
     const next = text.slice(0, mention.at) + `@${first} ` + text.slice(caret);
     setText(next);
     setMention(null);
-    const pos = mention.at + first.length + 2;
-    requestAnimationFrame(() => ref.current?.setSelectionRange(pos, pos));
+    pendingCaret.current = mention.at + first.length + 2;
   };
 
   return (

@@ -21,6 +21,7 @@ import { HighlightButton, LivePanel, type Live } from "./LiveHighlight";
 import { useHighlights } from "./useHighlights";
 import { QuestionsTab } from "./QuestionsTab";
 import { ShareControls } from "./ShareControls";
+import { ShortcutsButton, ShortcutsDialog } from "./ShortcutsButton";
 import { ScratchpadTab, useScratchpadActions } from "./ScratchpadTab";
 import { useKeyboard } from "./useKeyboard";
 import { SummaryTab } from "./SummaryTab";
@@ -94,6 +95,7 @@ function Inner({ meeting }: { meeting: Meeting }) {
 
   // Timed highlight started from the keyboard (or the H button) during playback.
   const [live, setLive] = useState<Live | null>(null);
+  const [help, setHelp] = useState(false);
   const liveRef = useRef(live);
   liveRef.current = live;
   const lastType = useRef<HighlightType>("insight");
@@ -123,6 +125,7 @@ function Inner({ meeting }: { meeting: Meeting }) {
   useKeyboard({
     ...typeKeys,
     h: () => (liveRef.current ? endLive() : startLive()),
+    "?": () => setHelp(true),
     Escape: () => liveRef.current && setLive(null),
     " ": () => store.toggle(),
     ArrowLeft: () => store.skip(-10),
@@ -139,18 +142,22 @@ function Inner({ meeting }: { meeting: Meeting }) {
       <div className="flex min-h-dvh flex-col lg:h-dvh">
         <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line px-4 py-2.5">
           <Link href="/" className="flex items-center gap-1 text-[12px] text-muted hover:text-fg">
-            <IconArrowLeft size={14} /> My meetings
+            <IconArrowLeft size={14} /> <span className="hidden sm:inline">My meetings</span><span className="sm:hidden">Back</span>
           </Link>
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
-            <h1 className="truncate text-[16px] font-semibold">{meeting.title}</h1>
-            <span className="flex items-center gap-1 rounded-md bg-raised px-1.5 py-0.5 text-[12px] text-muted">
+          <div className="order-3 flex w-full min-w-0 flex-wrap items-center gap-x-3 gap-y-1 lg:order-2 lg:w-auto lg:flex-1">
+            <h1 className="text-[16px] font-semibold leading-6 lg:truncate">{meeting.title}</h1>
+            <span className="flex items-center gap-1 whitespace-nowrap rounded-md bg-raised px-1.5 py-0.5 text-[12px] text-muted">
               <IconCalendar size={12} /> {shortDate(meeting.startedAt)} · {timeOfDay(meeting.startedAt)}
             </span>
             <span className="rounded-md bg-raised px-1.5 py-0.5 text-[12px] text-muted">{minutes(durationSec(meeting))}</span>
             <AvatarStack ids={meeting.participants} max={8} size={22} />
           </div>
-          <FollowUpEmailButton meeting={meeting} />
-          <ShareControls meeting={meeting} />
+          <div className="order-2 ml-auto flex items-center gap-2 lg:order-3 lg:ml-0">
+            <ShortcutsButton onClick={() => setHelp(true)} />
+            <FollowUpEmailButton meeting={meeting} />
+            <ShareControls meeting={meeting} />
+          </div>
+          {help && <ShortcutsDialog onClose={() => setHelp(false)} />}
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 lg:flex-row">

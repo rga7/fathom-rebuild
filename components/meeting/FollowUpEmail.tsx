@@ -15,7 +15,7 @@ export function FollowUpEmailButton({ meeting, className = "" }: { meeting: Meet
         onClick={() => setOpen(true)}
         className={`flex items-center justify-center gap-1.5 rounded-md border border-line px-2.5 py-1.5 text-[12px] text-muted hover:border-faint hover:text-fg ${className}`}
       >
-        <IconMail size={14} /> Follow-up email
+        <IconMail size={14} /> <span className="hidden sm:inline">Follow-up email</span><span className="sm:hidden">Email</span>
       </button>
       {open && (
         <Modal title="Follow-up email" onClose={() => setOpen(false)} wide>
