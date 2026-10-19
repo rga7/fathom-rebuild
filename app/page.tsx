@@ -4,6 +4,7 @@ import { durationSec } from "@/lib/derive";
 import { dayHeading, dayKey, timeOfDay } from "@/lib/format";
 import { AppHeader } from "@/components/AppHeader";
 import { MeetingsList, type ListItem } from "@/components/MeetingsList";
+import { AskPanel } from "@/components/AskPanel";
 
 export default function Home() {
   const items: ListItem[] = MEETINGS.map((m) => ({
@@ -30,7 +31,17 @@ export default function Home() {
   return (
     <div className="flex h-dvh flex-col">
       <AppHeader title="My meetings" />
-      <MeetingsList items={items} />
+      <div className="flex min-h-0 flex-1">
+        <MeetingsList items={items} />
+        <aside className="hidden w-[380px] shrink-0 flex-col p-3 pl-0 lg:flex">
+          <AskPanel
+            prompts={["What are my action items?", "What did we decide about SOC 2?", "Which deals are blocked on SOC 2?"]}
+            scopes={["mine", "all"]}
+            defaultScope="mine"
+            className="min-h-0 flex-1"
+          />
+        </aside>
+      </div>
     </div>
   );
 }

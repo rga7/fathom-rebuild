@@ -4,12 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Meeting } from "@/data/types";
 import { durationSec } from "@/lib/derive";
 import { minutes, shortDate, timeOfDay } from "@/lib/format";
+import { AskPanel } from "../AskPanel";
 import { AvatarStack } from "../Avatar";
 import { IconArrowLeft, IconCalendar, IconChecklist, IconList, IconPencil, IconSparkle } from "../icons";
 import { PlayerProvider, usePlayerStore } from "../player/context";
 import { Player } from "../player/Player";
 import { ActionItemsTab } from "./ActionItemsTab";
-import { AskPanel } from "./AskPanel";
 import { MeetingContext, type TabId } from "./context";
 import { ScratchpadTab } from "./ScratchpadTab";
 import { useKeyboard } from "./useKeyboard";
@@ -106,7 +106,7 @@ function Inner({ meeting }: { meeting: Meeting }) {
           <aside className="flex flex-col gap-3 lg:order-2 lg:w-[400px] lg:shrink-0 lg:min-h-0">
             <Player meeting={meeting} />
             <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">
-              <AskPanel />
+              <AskPanel current={meeting} prompts={meeting.suggestedPrompts} onSeek={seekTo} className="min-h-0 flex-1" />
             </div>
           </aside>
           <main className="flex min-h-[60vh] min-w-0 flex-1 flex-col rounded-xl border border-line bg-panel lg:order-1 lg:min-h-0">
@@ -119,7 +119,7 @@ function Inner({ meeting }: { meeting: Meeting }) {
             </div>
           </main>
           <div className="lg:hidden">
-            <AskPanel />
+            <AskPanel current={meeting} prompts={meeting.suggestedPrompts} onSeek={seekTo} />
           </div>
         </div>
       </div>

@@ -124,6 +124,13 @@ export function TranscriptTab() {
     el?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [activeId, follow, playing, query]);
 
+  // Opening the tab (or arriving via ?t=) brings the current line into view once.
+  useEffect(() => {
+    if (activeIdx <= 0) return;
+    rootRef.current?.querySelector(`[data-line="${lines[activeIdx].id}"]`)?.scrollIntoView({ block: "center" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     const scroller = document.getElementById("tab-scroll");
     if (!scroller) return;
