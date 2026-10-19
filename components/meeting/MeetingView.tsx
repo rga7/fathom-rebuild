@@ -6,11 +6,12 @@ import { durationSec } from "@/lib/derive";
 import { minutes, shortDate, timeOfDay } from "@/lib/format";
 import { AskPanel } from "../AskPanel";
 import { AvatarStack } from "../Avatar";
-import { IconArrowLeft, IconCalendar, IconChecklist, IconList, IconPencil, IconSparkle } from "../icons";
+import { IconArrowLeft, IconCalendar, IconChecklist, IconList, IconPencil, IconQuestion, IconSparkle } from "../icons";
 import { PlayerProvider, usePlayerStore } from "../player/context";
 import { Player } from "../player/Player";
 import { ActionItemsTab } from "./ActionItemsTab";
 import { MeetingContext, type TabId } from "./context";
+import { QuestionsTab } from "./QuestionsTab";
 import { ScratchpadTab } from "./ScratchpadTab";
 import { useKeyboard } from "./useKeyboard";
 import { SummaryTab } from "./SummaryTab";
@@ -23,6 +24,7 @@ function Tabs({ tab, setTab, counts }: { tab: TabId; setTab: (t: TabId) => void;
     { id: "summary", label: "Summary", icon: <IconSparkle size={14} /> },
     { id: "actions", label: "Action Items", icon: <IconChecklist size={14} /> },
     { id: "transcript", label: "Transcript", icon: <IconList size={14} /> },
+    { id: "questions", label: "Questions", icon: <IconQuestion size={14} /> },
     { id: "scratchpad", label: "Scratchpad", icon: <IconPencil size={14} /> },
   ];
   return (
@@ -110,11 +112,12 @@ function Inner({ meeting }: { meeting: Meeting }) {
             </div>
           </aside>
           <main className="flex min-h-[60vh] min-w-0 flex-1 flex-col rounded-xl border border-line bg-panel lg:order-1 lg:min-h-0">
-            <Tabs tab={tab} setTab={setTab} counts={{ actions: meeting.actionItems.length }} />
+            <Tabs tab={tab} setTab={setTab} counts={{ actions: meeting.actionItems.length, questions: meeting.questions.length }} />
             <div className="min-h-0 flex-1 overflow-y-auto p-4" id="tab-scroll">
               {tab === "summary" && <SummaryTab />}
               {tab === "actions" && <ActionItemsTab />}
               {tab === "transcript" && <TranscriptTab />}
+              {tab === "questions" && <QuestionsTab />}
               {tab === "scratchpad" && <ScratchpadTab />}
             </div>
           </main>

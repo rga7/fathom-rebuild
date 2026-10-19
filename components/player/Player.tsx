@@ -71,6 +71,7 @@ export function Scrubber({ meeting, highlights = [] }: { meeting: Meeting; highl
   const store = usePlayerStore();
   const d = store.duration || 1;
   const pct = usePlayer((s) => Math.round((s.time / d) * 2000) / 20);
+  const sec = usePlayer((s) => Math.floor(s.time));
   const clip = usePlayer((s) => s.clip);
   const ref = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -91,8 +92,8 @@ export function Scrubber({ meeting, highlights = [] }: { meeting: Meeting; highl
       aria-label="Seek"
       aria-valuemin={0}
       aria-valuemax={Math.round(d)}
-      aria-valuenow={Math.round((pct / 100) * d)}
-      aria-valuetext={clock((pct / 100) * d)}
+      aria-valuenow={sec}
+      aria-valuetext={clock(sec)}
       onKeyDown={(e) => {
         if (e.key === "ArrowLeft") (e.preventDefault(), e.stopPropagation(), store.skip(-5));
         if (e.key === "ArrowRight") (e.preventDefault(), e.stopPropagation(), store.skip(5));
