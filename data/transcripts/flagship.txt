@@ -1,0 +1,542 @@
+# id: flagship
+# target: 3548
+# offset: 4
+# Q1 planning: Atlas 2.0 scope and launch date. 8 participants, ~61 minutes.
+# Deliberate speech-to-text errors (summaries correct them): "sock two" = SOC 2,
+# "samel" = SAML, "see are DTs" = CRDTs, "post gress" = Postgres, "octa" = Okta.
+
+# ---- Chapter 1: Kickoff and context
+jordan: Okay, I think that's everyone. Lena, are you joining from the airport? {#ch_kickoff}
+lena: I'm at the gate, so if you hear boarding announcements, that's me. I'll stay on mute.
+jordan: Perfect. Thanks for making time, everyone.
+tom: Sorry, sorry, I'm here. Can you hear me? My laptop decided this was a good time to install updates.
+jordan: We can hear you, Tom. You're good, we haven't started.
+tom: Okay, great. I'm going to keep my camera off for a minute while this thing finishes restarting itself.
+dev: Tom, you're echoing a little bit, I think you've got the meeting open in two tabs.
+tom: Oh, you're right, I do. Hang on. Is that better?
+dev: Much better.
+jordan: So the goal for today is pretty narrow.
+jordan: We need to leave this room with a scope for Atlas 2.0 and a launch date we actually believe in. {#goal}
+jordan: Not a wish list. A scope and a date.
+maya: And an owner for each piece, ideally.
+jordan: And owners, yes. Maya's going to hold me to that.
+marcus: Can we also talk about the enterprise blockers? Because I've got three deals that are basically parked.
+jordan: Yes, that's on the agenda, it's section two. I promise we'll get there.
+jordan: Quick context first, and I'll keep it short.
+jordan: Q3 closed at one point nine million in new ARR, which is about eight percent under plan.
+jordan: Net revenue retention came in at ninety-four percent.
+jordan: That's the number that worries me more than new ARR, honestly.
+jordan: Because new ARR we can usually fix with pipeline and a couple of good months, but when retention slips, it compounds, and it means the product isn't doing the job for people who already bought it.
+aisha: Same. Ninety-four is the lowest we've been in six quarters.
+jordan: Right. And gross logo churn was eleven accounts in the quarter.
+dev: Eleven out of how many? {#q_eleven}
+jordan: Out of about three hundred and forty active accounts.
+dev: Okay, so a bit over three percent a quarter.
+jordan: Yeah. Which annualizes to something we really don't want to say out loud.
+marcus: Twelve-ish percent.
+jordan: You said it out loud.
+marcus: Somebody had to.
+jordan: So the framing I want to propose is that Atlas 2.0 is first a retention release, and second a new-logo release.
+jordan: But I know not everyone agrees with that ordering, which is fine. That's what today is for.
+marcus: I mean, I don't disagree that retention matters.
+marcus: I disagree that we can't do both in the same release.
+jordan: Fair. Let's hold that thought. I want the data on the table first.
+maya: Can I add one thing to context before we jump in?
+jordan: Go ahead.
+maya: Engineering capacity for Q1 is lower than people think.
+maya: We have two people on parental leave starting in January, and the platform migration eats roughly a third of the sync team.
+maya: So whatever we pick, it has to fit in about fourteen engineer-months, not twenty. {#capacity_number}
+tom: Fourteen including the security work, or on top of it?
+maya: Including. That's the whole pie.
+tom: Okay. That's going to matter later.
+jordan: Noted. Sofia, anything from design before we start?
+sofia: Just that we finished the offline research sessions last week, so I have real findings, not opinions.
+sofia: I'll share those when we get to the customer section.
+jordan: Great. And Lena, the launch side?
+lena: Mostly I need a date I can plan against. Events, the website, the analyst briefing, all of it hangs off that date.
+lena: If it slips after I've booked things, that's money we don't get back.
+jordan: Understood. Okay, agenda.
+jordan: One, customer signals. Aisha and Marcus.
+jordan: Two, engineering capacity and how we split it.
+jordan: Three, security and compliance with Tom.
+jordan: Four, design and the launch plan.
+jordan: And five, owners and open questions.
+jordan: I'm aiming to be done by the top of the hour.
+dev: Optimistic.
+jordan: I contain multitudes. Aisha, take it away.
+[pause 2]
+
+# ---- Chapter 2: Customer signals
+aisha: Thanks. So I went through every churned and downgraded account from the last two quarters. {#ch_signals}
+aisha: That's eleven churns this quarter and fourteen last quarter, plus nine downgrades.
+aisha: And I tagged the exit interviews and the support tickets leading up to each one.
+aisha: The number one reason, by a wide margin, is technicians losing their work when they don't have signal.
+aisha: Seventeen of the twenty-five churned accounts mentioned it in some form. {#churn_offline}
+jordan: Seventeen of twenty-five.
+aisha: Seventeen of twenty-five. Sometimes it's the first thing they say. {#hl_insight_end}
+aisha: The typical story is a technician is in a basement, or a rural site, or a hospital with thick walls, and they fill out a whole work order.
+aisha: Then they lose connection, the app spins, and when it comes back, the form is gone.
+aisha: Orchard Health told me one of their techs re-entered the same inspection three times in a day.
+aisha: And their ops manager, Greg, said something on our last check-in that stuck with me. He said, "My guys have started writing things on paper first and typing them in later, which means I'm paying for software so they can do double data entry." {#greg_quote}
+jordan: Oof. That's a brutal quote.
+aisha: It is. And he wasn't even angry when he said it, he was just tired, which is honestly worse.
+maya: Is that the app crashing or the session timing out? {#q_crash}
+aisha: Both, depending on the platform. On Android it's usually the session timeout.
+aisha: On iOS it's more that the form state isn't persisted when the app gets backgrounded.
+dev: That second one is a bug we can fix without any offline architecture, for what it's worth.
+aisha: Which would be great. But customers don't really separate those. To them it's just "Lumen loses my work."
+aisha: Number two reason is pricing. Five accounts said we were too expensive for what they used.
+aisha: And when I dug into those five, four of them were only using scheduling. They never turned on the work order forms or the asset history, which is most of the value, so they were paying for a product they were using maybe a third of.
+jordan: So that's partly an onboarding problem, not just a price problem.
+aisha: I'd say mostly an onboarding problem. If they'd been using forms, I don't think price would have come up at all. But I don't want to over-claim, it's five accounts.
+aisha: And number three is a cluster I'd call "we outgrew you." Bigger customers who wanted SSO, audit logs, that kind of thing.
+marcus: Which is exactly my point.
+aisha: It's part of your point. It was three accounts.
+marcus: Three accounts that were each bigger than ten of the small ones.
+aisha: That's true. I'm not disputing the dollar value.
+jordan: Can you give me the dollar split? Offline versus enterprise readiness?
+aisha: Roughly. Offline-related churn was about four hundred and ten thousand in ARR. {#churn_dollars}
+aisha: The enterprise-readiness churn was about two hundred and sixty thousand.
+jordan: Okay. So offline is bigger in dollars too, not just in count.
+aisha: In churn, yes. Marcus is going to tell you about pipeline, which is a different picture.
+marcus: Yeah. So, can I go?
+jordan: Go.
+marcus: Okay. Pipeline-wise, I have three enterprise deals in late stage that are blocked on the same two things.
+marcus: Sock two Type Two and samel single sign-on. {#marcus_blockers}
+marcus: Brightline Logistics, Kessler Field Services, and Orchard's parent company, which is a separate deal from the Orchard account Aisha mentioned.
+marcus: Combined, that's about one point two million in first-year ACV. {#pipeline_value}
+dev: One point two total, or each?
+marcus: Total. I wish each.
+marcus: Brightline is the biggest, about five hundred and forty thousand, and they're the furthest along. Rachel, their director of field ops, is basically our champion at this point, she's been pushing it internally for two months.
+marcus: Kessler is around four hundred thousand. They're running a paid pilot with us right now, so they've actually used the product, and the pilot's going well, but procurement won't sign the full contract without the report.
+marcus: And Orchard's parent company is about two hundred and seventy, and that one's earlier, honestly. I've had two calls with their IT folks and the first thing they sent was the security questionnaire, before they'd even seen a demo.
+jordan: And all three have the same competitor in the mix?
+marcus: Two of the three for sure. The third one, Kessler, I think they're evaluating one other vendor but they haven't told me who, and I haven't pushed.
+maya: What's the timeline on each? Like, when do they actually need to sign by?
+marcus: Brightline wants to sign this quarter if they can, but realistically Q1. Kessler's pilot wraps up in late November, and they told me end of Q2 is their absolute deadline to roll out, so they need to sign before that. Orchard parent, no real timeline yet.
+marcus: And every one of their security teams has sent the same questionnaire back with the same two red flags.
+marcus: No sock two report, no samel. They will not sign without at least a committed date.
+maya: A committed date, or the actual report? {#q_report}
+marcus: Brightline will sign with a committed date and a bridge letter. Kessler wants the report. Orchard's parent, I honestly don't know yet.
+tom: For what it's worth, a bridge letter only works if we've actually started the observation window.
+tom: You can't bridge to nothing.
+marcus: Right, so that's why I need us to start.
+jordan: Okay. Let's not solve it yet. Sofia, can you share the research?
+sofia: Sure, let me share my screen. Can everyone see a slide that says "Offline field study"?
+dev: Yep.
+lena: I see it. Barely, but I see it.
+sofia: So we did six sessions with technicians from four customers. Two HVAC, one medical equipment, one elevator maintenance.
+sofia: I'll skip the method stuff. Three findings.
+sofia: First, technicians don't think in terms of online and offline. They think in terms of "will this save or not."
+sofia: Nobody asked for an offline mode toggle. Not one person. {#no_toggle}
+sofia: They want the app to just keep what they typed, and sync when it can. {#hl_feedback_end}
+sofia: Second, the thing they need offline is narrow. It's the work order they're on, the asset history for that one site, and the form they're filling.
+sofia: They don't need the whole schedule, they don't need dispatch, they don't need reporting.
+sofia: One of the elevator technicians actually walked me through his day, and out of about nine hours, he said he's in a dead zone for maybe three, mostly in machine rooms and shafts, and that's exactly when he's filling out the inspection checklist, because he's standing in front of the equipment.
+sofia: So the moment he most needs the app is the moment it's least likely to work. Which is kind of the whole problem in one sentence.
+dev: That's actually really helpful. That shrinks the data we'd need to cache by a lot.
+sofia: That's what I hoped you'd say.
+sofia: Third, and this one surprised me, photo uploads are the biggest pain point.
+sofia: They take ten, fifteen photos per job and the upload fails silently on bad connections. {#photo_insight}
+sofia: Then the office calls them later asking where the photos are, and the tech has already driven to the next site.
+aisha: Oh, that's half my support tickets. The photo thing.
+sofia: Right. So my recommendation is that the first version of offline is really "never lose work, and queue uploads," not a full offline app.
+jordan: That's a really useful reframe.
+maya: It also changes the engineering estimate quite a bit, which I'll get to.
+lena: Sorry, quick question, does "queue uploads" include signatures? Customers sign on the tablet at the end of a job. {#q_signatures}
+sofia: Yes. Signatures and photos both, they go in the same queue.
+lena: Great, thanks. That's a marketing story on its own.
+jordan: Okay. Aisha, anything else before we move on?
+aisha: One more data point. When I asked the churned accounts what would have kept them, offline came up more than price.
+aisha: Even the price-sensitive ones said "if it didn't lose my work, I'd pay for it."
+marcus: Respectfully, people say a lot of things in exit interviews. {#hl_objection}
+aisha: They do. But it's also in the tickets before they churned, not just the interviews.
+marcus: Fair.
+jordan: Okay. That's a good setup for the hard part. Maya, capacity.
+[pause 2]
+
+# ---- Chapter 3: Engineering capacity and the offline vs enterprise debate
+maya: Okay. So I've got rough estimates for the four big candidates. {#ch_capacity}
+maya: Full offline mode, the way we scoped it in the spring, is about nine engineer-months.
+maya: Sofia's narrower version, "never lose work plus an upload queue," is closer to five.
+maya: SAML SSO is about two engineer-months if we use a library and don't build our own.
+maya: The sock two work, the engineering part, logging, access reviews, change management tooling, call it two to three.
+maya: And route optimization, which is the thing the old roadmap had as the headline, is six at minimum.
+jordan: So five plus two plus three is ten. Plus route optimization is sixteen.
+maya: Which doesn't fit in fourteen.
+jordan: Which doesn't fit in fourteen.
+dev: And that's before any slippage, and we always slip on sync work.
+maya: Dev's being honest. Sync work has slipped every single time.
+dev: Every single time. Including the time I said it wouldn't.
+jordan: Okay, so something has to come out. I think route optimization moves to Q2.
+marcus: Hang on, before we cut things. Why are we assuming offline goes first? {#q_why_offline}
+marcus: Because from where I sit, SSO and sock two unblock one point two million right now, and offline is a retention bet.
+maya: It's not a bet, Aisha just showed seventeen of twenty-five churns—
+marcus: Churned accounts, which are gone. I'm talking about money that's sitting on the table— {#dis_start}
+maya: And I'm talking about the three hundred accounts that haven't churned yet. {#dis_peak}
+maya: If we lose another eleven next quarter, that's more than your three deals combined over two years.
+marcus: That assumes offline actually fixes churn, which we don't know.
+aisha: We kind of do know. I mean, it's the most consistent signal we have.
+marcus: It's a signal. It's not proof.
+maya: Nothing's proof until we ship it, Marcus. That's true of SSO too. {#dis_end}
+marcus: No, SSO is different. They literally put it in writing. "We will sign when you have SSO."
+dev: Can I jump in with something technical? I think it changes this argument a bit.
+jordan: Please.
+dev: SSO and offline don't really compete for the same people.
+dev: SSO is mostly backend auth work. The offline work is mostly the mobile team and the sync engine.
+dev: The overlap is basically me, because I'm on both reviews, and Ben, who owns the session layer.
+maya: That's true for SSO. It's less true for the sock two work, because that touches everything.
+dev: Right, the audit logging touches every service.
+tom: And the access reviews touch every system anyone has access to, which is a lot of systems.
+marcus: Okay, so then can't we just do both? Offline and the enterprise stuff, and push route optimization like Jordan said?
+maya: Five plus two plus three is ten out of fourteen. On paper, yes.
+maya: But I've watched us plan to ninety percent of capacity before, and it doesn't end well.
+jordan: What's the buffer you'd want?
+maya: Twenty percent minimum on anything involving sync. So realistically we can commit eleven, eleven and a half.
+jordan: So ten fits inside eleven and a half. Barely.
+maya: Barely. With zero room for the Android rewrite, which nobody has mentioned yet.
+jordan: Okay, before we go into Android, I want to step back for a second, because I think we're arguing about two different things.
+jordan: Marcus, your argument is that enterprise readiness unblocks known money that's on the table now. Maya, your argument is that offline protects the base, which is bigger money over a longer time. Is that fair?
+marcus: That's fair.
+maya: That's fair, yes. And I'd add that I'm also arguing about predictability. SSO is predictable. Sync is not. I'd rather put the unpredictable thing first so it has the most time.
+marcus: See, I'd argue the opposite. Put the predictable thing first so you actually ship something.
+dev: You're both kind of right, which is annoying.
+jordan: Very annoying. Okay, let's keep going and come back to the order, I think the Android piece affects it.
+dev: Oh, right, the legacy Android app.
+jordan: Remind me where that landed?
+dev: The legacy Android app is on an old framework that's going end-of-life next year. Somebody has to migrate it.
+dev: And offline is way easier to build once, on the new stack, than to build twice.
+maya: Which is the honest reason I'm nervous. If we build offline on the legacy Android app, we'll throw half of it away.
+marcus: So then build it on iOS first?
+dev: Sixty percent of technicians are on Android. Mostly cheap rugged tablets.
+marcus: Okay, never mind.
+sofia: Could we do the "never lose work" part as a smaller piece first? Like the form persistence bug Dev mentioned?
+dev: Yeah, the persistence fix is maybe two weeks. It's not the queue, it's just saving drafts locally.
+sofia: Because that alone would address a chunk of the complaints Aisha read out.
+aisha: A big chunk. Probably a third of the tickets.
+jordan: So that's a quick win we can ship in Q4, not Q1.
+maya: If Dev has two weeks in Q4.
+dev: I can find two weeks in Q4. Maybe not the same two weeks Maya is thinking of.
+maya: Ha. Fine.
+jordan: Okay. Let me try to say back where I think we are, and then you can tell me I'm wrong.
+jordan: Route optimization moves to Q2. Nobody's fighting for it in Q1.
+lena: I mean, marketing was kind of fighting for it. It's the flashier story.
+jordan: Is it a hill you want to die on?
+lena: No. "Never lose your work" is honestly a better headline for this audience.
+jordan: Okay. So route optimization moves to Q2.
+jordan: Then offline, the narrow version, and SSO both go in Atlas 2.0.
+marcus: And sock two.
+jordan: And the engineering part of sock two, which Tom's going to tell us about.
+marcus: Okay, I can live with that. As long as SSO isn't the thing that gets cut when offline slips.
+maya: I can't promise that, honestly. If offline slips, something has to give.
+marcus: Then I want it written down that SSO doesn't give.
+maya: And I want it written down that if we hit the sync problems we always hit, we don't add scope to make up for it.
+jordan: Okay, okay. Both of those are reasonable. Let's park the tiebreak until we hear from Tom, because the audit timeline might decide it for us.
+marcus: Fine.
+maya: Fine.
+dev: Can I ask one technical question before we move on? It's about the sync engine.
+jordan: Quick one.
+dev: For the upload queue, are we okay with last-write-wins on conflicts, or do we need real merges? {#q_lww}
+dev: Because real merges means see are DTs or something like them, and that is not a five-month project. {#hl_tech_end}
+sofia: From the research, conflicts are really rare. Two techs almost never edit the same work order at the same time.
+dev: That's what I hoped. So last-write-wins with a conflict log for the office to review?
+sofia: I think that'd be fine for version one.
+maya: I'd want to see that in a doc before we commit, but yes, that's the right direction.
+dev: I'll write it up. A short spike doc on the queue and the conflict rules, by end of next week. {#ai_dev_spike}
+jordan: Thanks, Dev. That's Friday the twenty-third?
+dev: Friday the twenty-third.
+aisha: Can I ask something about the data side? Where does the queue live on the device? Because some customers wipe tablets every night.
+dev: Ooh. Every night? Which customers?
+aisha: At least two of the medical equipment ones. It's a compliance thing for them.
+dev: Then queued work would get wiped before it syncs. That's a real problem.
+maya: How many accounts are we talking? {#q_wipe}
+aisha: I'd have to check. I don't know offhand.
+jordan: Let's take that offline. No pun intended.
+dev: Pun absolutely intended.
+jordan: Seriously though, Aisha, if you can find out which accounts wipe devices and how often, that changes Dev's design, so it's worth chasing quickly.
+aisha: I'll ask the account managers. Some of them will know off the top of their head, some won't.
+jordan: Moving on. Actually wait, one more thing on capacity.
+jordan: Maya, does the post gress migration still have to happen in Q1? Because that's a third of the sync team.
+maya: It does. The current database version goes out of support in March. We don't really have a choice there.
+dev: We could do it in stages, but it doesn't save total time, it just spreads it out.
+jordan: Okay. So that's fixed. Fine.
+marcus: Can I make one more argument and then I'll drop it?
+jordan: One.
+marcus: If we commit to SSO for March and miss, I lose all three of those deals. Not one of them. All three.
+marcus: They're going to sign with the competitor that already has it. I know which competitor, and they have it.
+maya: I hear you. I'm not trying to cut SSO. I'm trying to not over-promise.
+marcus: Then let's sequence it so SSO lands first. Like, in February, ahead of offline.
+dev: That's actually not crazy. SSO is the more predictable piece.
+maya: Hmm.
+maya: If SSO lands in February, does that give Brightline enough to sign in Q1?
+marcus: With the sock two window started too? Yes. I'm pretty sure.
+maya: Okay. I'm open to that. Sequencing it first doesn't cost us capacity, it just changes the order.
+jordan: Good. That feels like progress. Let's hear from Tom.
+[pause 2]
+
+# ---- Chapter 4: Security and compliance
+tom: Okay. So the short version is the sock two clock is the long pole, not the engineering. {#ch_security}
+tom: Type Two requires an observation period. The minimum most auditors will accept is three months.
+tom: Then the auditor needs four to six weeks after that to write the report.
+tom: So if we want a report in hand by, say, end of April, the observation window has to start in early January.
+tom: If it starts in February, we're looking at a report in late May or June.
+marcus: Kessler won't wait until June. They told me end of Q2 is their absolute hard stop.
+tom: Then we need to start by January sixth. That's the first Wednesday after New Year's. {#jan6}
+maya: And what has to be true for the window to start?
+tom: The controls have to be in place and operating. Audit logging, access reviews, the change management process, the vendor list, the policies.
+tom: Policies I can do myself. Most of them are drafted already.
+tom: I've got the information security policy, acceptable use, incident response, business continuity, and vendor management drafted. What I don't have is the vendor inventory, which means somebody has to tell me every SaaS tool we use that touches customer data, and I promise you it's more than anyone thinks.
+maya: I can get you the engineering list. It's probably twenty-something tools.
+marcus: Sales has a few too. The call recording tool, the CRM, the e-signature thing.
+tom: Right, all of those count. I'll send a form around next week, please just fill it out honestly, even the free tools people signed up for with their work email.
+tom: The tooling is the engineering part. Audit logs especially.
+dev: Audit logs across all services by January sixth is tight. But it's doable if we start in November.
+dev: The tricky part isn't writing the logs, it's that we have about fourteen services and four of them were written before anyone here worked at the company. Nobody really knows what half the endpoints do.
+tom: Which, to be fair, is exactly the kind of thing the auditor will ask about.
+dev: Right. So what I'd propose is we put a shared logging library in front of everything, ship it service by service, and start with the ones that touch customer data, so the work order service, the photo store, and auth.
+maya: And the old reporting service? That one still has direct database access from like three places.
+dev: That one's going to hurt. I'd want Ben on it, he's the only one who's been in that code recently.
+tom: As long as the customer data paths are covered by January sixth, the rest can come during the observation window. I'd rather have a documented gap than a rushed implementation that logs the wrong things.
+maya: Okay. I'll budget the audit logging work for November and December then, and Ben moves to SSO in January.
+tom: It doesn't have to be perfect. It has to be operating, and we fix gaps during the window.
+tom: Auditors are fine with remediations as long as they're documented.
+jordan: Okay. And do we have an auditor?
+tom: We have two quotes. I haven't booked either. One of them can start in January, the other one is booked until March.
+jordan: So we book the January one.
+tom: That's my recommendation. I just need budget sign-off. It's about forty-two thousand for the Type Two.
+jordan: You have it. I'll get finance to approve it this week.
+tom: Great.
+marcus: Can I tell Brightline and Kessler January sixth, then?
+tom: Not until the auditor's booked. Give me until end of month.
+marcus: End of October?
+tom: End of October. I'll have the engagement letter signed by the thirtieth. {#ai_tom_auditor}
+marcus: Okay. Then I'll hold the emails until you confirm.
+tom: Actually, no, you can send them now with "targeting." Just don't say "committed" until I confirm.
+marcus: Got it. Targeting.
+maya: Tom, what about SSO from your side? Any requirements I should know about?
+tom: Two. It has to support octa and Azure AD, because every one of these enterprise accounts uses one of the two.
+tom: And we need SCIM provisioning eventually, but not for version one. Version one is just login.
+dev: Octa and Azure both speak samel, so that's the same work. SCIM is a separate project.
+tom: Right, SCIM can be Q2. Nobody's blocked on it yet.
+marcus: Kessler asked about SCIM.
+tom: Did they say they'd block on it?
+marcus: No. They asked about it.
+tom: Then it's Q2.
+marcus: Fine, fine.
+tom: One more thing, and this is a question I don't have an answer to.
+tom: We have three customers in the EU, and one of them asked about data residency last month.
+tom: If we add an EU region at some point, does that change the scope of the audit? I genuinely don't know. {#q_eu}
+maya: I don't know either. I'd assume yes, but I don't actually know.
+jordan: Can we ask the auditor when you book them?
+tom: Yeah, I'll add it to the list. But it might change the cost.
+jordan: Understood. Let's not let it block the January start.
+tom: Agreed. It shouldn't block anything for now.
+jordan: Okay. So I want to propose a decision here, because I think we have enough.
+jordan: Decision one. We start the sock two Type Two observation window on January sixth. {#dec1_start}
+jordan: Tom owns it. SAML SSO ships in Atlas 2.0 and lands first, in February, ahead of offline. {#dec_soc2}
+jordan: Does anyone object?
+maya: No objection, as long as we keep the buffer.
+marcus: No objection. Obviously.
+dev: No objection. I'll need Ben for the SSO work, though.
+maya: You can have Ben in January. Not December.
+dev: January's fine.
+jordan: Okay. Decision one is made. Tom, Maya, thank you.
+tom: Thanks.
+lena: Can I ask, do we announce sock two at launch, or wait for the report? {#q_announce}
+tom: Wait for the report. You don't want to announce an audit in progress.
+tom: You can say "SOC 2 Type Two in progress" on the trust page, but not in a press release.
+lena: Okay. That's helpful, I'll keep it off the launch messaging.
+jordan: Anything else on security before we go to launch?
+tom: Just the pen test. We're due for one, and enterprise customers will ask for the summary letter.
+tom: I'd like to do it in February, after SSO lands, so it covers the new auth.
+maya: That makes sense. Testing SSO before it exists is a waste of money.
+tom: Exactly.
+jordan: Okay, great. Thanks Tom.
+[pause 2]
+
+# ---- Chapter 5: Design and launch plan
+jordan: Okay, launch. Sofia, do you want to show the prototype first, or Lena the plan? {#ch_launch}
+sofia: Let me do the prototype. It's quick, and I think it informs the plan.
+sofia: Sharing again. Okay, so this is the work order screen on a tablet.
+sofia: The only new thing in the UI is this small status pill at the top. It says "Saved on device," or "Synced," or "Waiting for signal."
+sofia: That's it. No offline mode switch, no separate screen.
+aisha: Oh, I love that. That's exactly what the techs asked for. {#hl_positive}
+sofia: And then if you tap the pill, you see the queue. "Three photos waiting, one signature waiting."
+sofia: With a retry button, and the time it last tried.
+dev: How does the office side see it?
+sofia: On the dispatcher dashboard, the job shows a little cloud icon if it has unsynced work.
+sofia: So when the office calls asking where the photos are, they can already see "it's queued on the tech's device."
+aisha: That will cut so many tickets. You have no idea. {#hl_positive_end}
+marcus: Honestly, that's a great demo. I'd use that in every sales call.
+sofia: That's the goal. It's subtle, but it changes the feeling of the product.
+jordan: What's the confidence level on this design? Is it tested?
+sofia: Paper-tested with four of the six technicians. Not tested on real devices yet.
+sofia: And paper testing is good for the concept, but it's terrible for anything involving timing, like how long you wait before you get nervous that your photo didn't upload, so I really don't want to lock the interaction details until we've seen it on a device with a flaky connection.
+sofia: I'd want to do a proper round with a working prototype before we lock it. Same six people if I can get them.
+jordan: When could you do that?
+sofia: If Dev's team can give me a clickable build by end of October, I can run it the first week of November.
+dev: A clickable build, not a real one, right? Fake data, no actual sync?
+sofia: Fake data is fine. I just need it on a tablet, with the network toggling.
+dev: Then yes, I can get you that.
+sofia: Then I'll run the device test with the six technicians and have results by November sixth. {#ai_sofia_test}
+jordan: Great. Thank you.
+maya: One design question. What happens when the queue is full? Like if they're offline for a whole day?
+sofia: Good question. In the research, the longest anyone was offline was about five hours.
+sofia: But the rural HVAC folks said sometimes it's a full day.
+dev: Storage-wise, a full day of photos is maybe two or three hundred megabytes. Tablets can handle that.
+maya: And battery?
+dev: The queue shouldn't burn battery if we back off properly. I'll cover it in the spike doc.
+maya: Thanks.
+jordan: Okay, Lena. Launch plan.
+lena: Okay. I'll keep it tight because they're calling my group soon.
+lena: I want to propose we launch Atlas 2.0 at Field Service Connect, which is the biggest event for our buyers.
+lena: That's March twenty-fourth in Dallas. We have a booth, and I can get us a speaking slot if I confirm by mid-November.
+marcus: Every one of my top prospects goes to that.
+lena: Right. It's the one date where everyone's in one room.
+lena: And it's not just the booth. I'd want to brief the two analysts who cover field service software about two weeks before, so they're not hearing it on stage for the first time. They really don't like being surprised.
+lena: Then the website relaunch goes live the morning of the keynote, with the new pricing page if we have one, the trust page with the SOC 2 status, and the customer stories.
+lena: Which reminds me, I need two customer stories. Ideally one enterprise customer and one smaller customer who was going to churn and didn't.
+aisha: I can probably get you the second one from the beta. That's actually a great story if the beta goes well.
+marcus: And Brightline might do the first one if they sign in Q1. Rachel loves being on stage, honestly.
+lena: Okay, that would be amazing. I'll start the conversation with both of you after the brief is done.
+maya: March twenty-fourth for GA is aggressive for offline.
+lena: That's what I want to figure out. Is it aggressive, or impossible?
+maya: For SSO, it's comfortable. For the full upload queue, it's aggressive.
+dev: For the narrow version, on Android only, with last-write-wins, it's aggressive but doable.
+dev: On both platforms, it's not doable by March. iOS would be April at best.
+lena: So what if offline launches as a beta? On Android first?
+jordan: Say more.
+lena: We announce Atlas 2.0 GA on March twenty-fourth. SSO, audit logs, all the enterprise stuff is GA.
+lena: And "Never lose work" launches as a public beta, Android first, with iOS following.
+lena: Beta is honest, and it lets us show it on stage without promising it's perfect.
+lena: And frankly, every competitor demo at that show is going to be route optimization and AI scheduling, so if we show up with "your technicians will never lose their work again," we're the only booth talking about the thing technicians actually complain about.
+marcus: I like that. I can sell enterprise readiness as GA and offline as the roadmap.
+aisha: And for my at-risk accounts, I can get them into the beta early. That's a retention play.
+aisha: I'd actually want to hand-pick the beta list. The accounts that churn on this issue.
+aisha: Not the ones that already churned, obviously, but the ones with the same pattern in their tickets. I have maybe twenty accounts in mind that are showing exactly the same signals the churned ones showed about two quarters before they left.
+jordan: That's smart. Maya, Dev, does beta on Android by March twenty-fourth work?
+maya: Beta on Android with the narrow scope? Yes. I'm comfortable with that.
+dev: Same. As long as "beta" means we can still change the conflict behavior.
+lena: It does. That's literally what beta means.
+sofia: And I'd want the status pill in the beta. It's not offline without it.
+dev: The pill's easy. The pill's the easy part.
+jordan: Okay. So I'm going to propose decision two. {#dec2_start}
+jordan: Atlas 2.0 goes GA on March twenty-fourth at Field Service Connect.
+jordan: SSO and the enterprise features are GA. "Never lose work" ships as a beta, Android first, with read access and queued writes.
+jordan: Route optimization moves to Q2. {#dec_launch}
+jordan: Objections?
+marcus: None.
+maya: None. Thank you for the buffer.
+dev: None.
+sofia: None from me.
+aisha: None. Very happy, actually.
+tom: Fine by me.
+lena: None. And I'll confirm the speaking slot.
+jordan: Great. Decision two is made.
+lena: Then I'll draft the launch brief and the beta criteria, and have it to everyone by November third. {#ai_lena_brief}
+jordan: Perfect. Lena, before you go, pricing.
+lena: Ugh, pricing.
+jordan: Is "Never lose work" in the base plan, or is it an add-on? {#q_pricing}
+lena: I don't know. That's the honest answer.
+marcus: If it's an add-on, I'll have customers who feel like we're charging them to fix a bug.
+aisha: That's what I'm worried about too. The churned accounts would see it that way.
+lena: But if it's base, we leave money on the table with the enterprise accounts who'd pay for it.
+jordan: Could it be base for the core part, and an add-on for things like longer offline storage?
+lena: Maybe. I'd need to model it. I can't answer that today.
+jordan: Okay. Let's leave it open. It doesn't block the build either way.
+lena: Agreed. Okay, they're boarding my group. I'm going to drop.
+jordan: Safe travels, Lena. Thank you.
+lena: Bye everyone.
+[pause 2]
+maya: Before we wrap, I want to go back to the Android question.
+maya: Who owns the legacy Android migration? Because offline on Android depends on it, and right now nobody owns it. {#q_android}
+dev: I can't own it. I'm on the sync engine and SSO reviews.
+maya: I know. I'm not asking you.
+maya: But I want to be really clear that offline on Android is blocked on this. If nobody owns the migration by the first week of December, the March beta is at risk, and I'd rather say that now than in February.
+jordan: Is it a mobile team thing?
+maya: The mobile team is three people, and two of them are on the offline work.
+jordan: Hmm. So we need to hire, or borrow?
+maya: Or contract. But someone needs to decide, and I don't think it's going to be decided in this meeting.
+jordan: Okay. That's an open question too. Let's note it.
+sofia: Can I suggest the design side might help? We have a contractor who's done Android work.
+maya: For design, or engineering?
+sofia: Engineering. She's a front-end dev, but she's shipped Android apps before.
+maya: Send me her details. No promises.
+sofia: Will do.
+maya: And while we're on staffing, Jordan, I'll need you in the conversation with finance if we end up contracting. Last time it took six weeks to get a contractor approved, and we don't have six weeks.
+jordan: Agreed. Flag it to me as soon as you have a candidate and I'll walk it through.
+aisha: Sorry, can I go back to the beta list for a second?
+jordan: Sure.
+aisha: I'd like to propose a first cut by end of next week. Accounts with offline complaints in the last six months.
+aisha: I'll pull the churn interviews tagged "offline" too, so everyone can hear it in the customer's own words.
+jordan: That would be great. When can you share those?
+aisha: The interview clips I can share by Thursday, October twenty-second. {#ai_aisha_churn}
+jordan: Perfect.
+marcus: And send them to me too. I want to hear what Orchard said.
+aisha: I'll send them to everyone.
+[pause 1]
+
+# ---- Chapter 6: Owners, open questions, next steps
+jordan: Okay. We have about eight minutes. Let's go around for owners. {#ch_wrap}
+jordan: And I'm going to ask everyone to say a date out loud, because I'm going to put it in the memo, and the recording will hold us to it.
+dev: That's mildly threatening.
+jordan: It's meant to be mildly threatening.
+jordan: Marcus, you're first, because I know you've been waiting.
+marcus: Ha. I'll email Brightline, Kessler, and the Orchard parent with the SSO and sock two timeline.
+marcus: Saying "targeting," not "committed," like Tom said.
+marcus: I'll get those out by Wednesday, October twenty-first. {#ai_marcus_prospects}
+tom: And copy me, please, in case their security teams have follow-up questions.
+marcus: Will do.
+jordan: Tom?
+tom: Book the auditor and sign the engagement letter by October thirtieth. Confirm the January sixth start.
+tom: And I'll ask them about the EU residency question.
+jordan: Dev?
+dev: Spike doc on the upload queue and conflict rules, Friday the twenty-third. And the clickable build for Sofia by end of October.
+jordan: Sofia?
+sofia: Device test with the six technicians, results by November sixth. And send Maya the contractor's details.
+jordan: Aisha?
+aisha: Churn clips by the twenty-second, and the first cut of the beta list next week.
+jordan: Maya?
+maya: I'll rebalance the Q1 capacity plan with route optimization moved to Q2, and SSO sequenced first.
+maya: By Friday, October twenty-third. {#ai_maya_capacity}
+jordan: And Lena's doing the launch brief by November third.
+jordan: And I'll write up the decision memo with both decisions and circulate it today. {#ai_jordan_memo}
+maya: Today today?
+jordan: Today today. While it's fresh.
+jordan: Okay, open questions. Let me read them back so we don't lose them.
+jordan: One, does "never lose work" live in the base plan or as an add-on? Lena's going to model it.
+jordan: Two, who owns the legacy Android migration? Maya's going to come back on that.
+jordan: Three, does an EU region change the sock two scope? Tom's asking the auditor.
+jordan: And four, the tablet wipe thing Aisha raised. How many customers wipe devices nightly?
+aisha: I'll check on that one. I genuinely don't know how many.
+dev: That one worries me the most, honestly. If the queue gets wiped, we've built the opposite of "never lose work."
+maya: Agreed. That one has to be answered before the spike doc is final.
+dev: I'll leave a placeholder in the doc for it.
+jordan: Anything I missed?
+marcus: The pen test. Tom said February.
+tom: Right. Pen test in February, after SSO lands.
+jordan: Got it, I'll add it to the memo.
+sofia: Can we also capture that there's no offline toggle in the UI? I don't want that to get re-litigated in two weeks.
+jordan: Good call. Design principle: no offline mode switch. The app just saves.
+maya: I'll back that up whenever it comes up.
+jordan: Okay. One last thing. I know the beginning of this got a little heated.
+marcus: Sorry about that.
+maya: Me too. For what it's worth, I think we landed in a good place.
+marcus: I think so too. SSO first, beta for offline, everybody gets something.
+jordan: Honestly, that was the right argument to have. I'd rather have it now than in February.
+jordan: The worst version of this meeting is the one where everyone nods, and then three weeks from now we find out sales and engineering had completely different launches in their heads.
+aisha: Agreed.
+jordan: Okay. Recap, really quickly.
+jordan: Sock two observation window starts January sixth. SSO lands in February, ahead of offline.
+jordan: Atlas 2.0 GA on March twenty-fourth at Field Service Connect, with "never lose work" in beta on Android.
+jordan: Route optimization moves to Q2.
+jordan: And the form persistence fix ships in Q4 as a quick win.
+dev: Two weeks. I said two weeks.
+jordan: You said two weeks. It's in the transcript now.
+dev: Great. Love that for me.
+jordan: Thanks, everyone. I'll send the memo this afternoon.
+maya: Thanks, Jordan.
+tom: Thanks all.
+sofia: Bye!
+aisha: Thanks, bye.
+marcus: Later.

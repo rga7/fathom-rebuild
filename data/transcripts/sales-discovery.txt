@@ -1,0 +1,88 @@
+# id: sales-discovery
+# Discovery call with Brightline Logistics. Marcus (AE) leads, Jordan joins for product.
+marcus: Rachel, Omar, thanks for making the time. I know Thursdays are busy for you. {#ch_intro}
+rachel: Of course. We've been looking forward to it, honestly.
+marcus: I brought Jordan, who runs product, because I think a lot of your questions will be about where the product is going.
+jordan: Hi both. Happy to be here, and happy to be grilled.
+omar: We'll be gentle. Mostly.
+marcus: So my plan was to spend most of this on your world, not on us. Is that okay?
+rachel: That's perfect.
+marcus: Great. Rachel, can you walk us through how field work runs today, end to end? {#q_walkthrough}
+[pause 1]
+rachel: Sure. So we have about four hundred technicians across eleven regions. Mostly refrigeration and cold-chain equipment at distribution centers. {#ch_pain}
+rachel: Dispatch is centralized in Columbus, and today they schedule everything in a mix of our old ERP and spreadsheets. A lot of spreadsheets.
+rachel: Technicians get their jobs on a mobile app that came with the ERP, which, I'll be honest, they hate.
+marcus: What do they hate about it most?
+rachel: It's slow, it logs them out constantly, and if they lose signal in a freezer, which happens all the time, they lose whatever they typed.
+rachel: Our freezers are basically Faraday cages. There is no signal in there. None.
+jordan: That's a story we hear a lot. How do they work around it today?
+rachel: Paper. They write it down in the freezer, then type it into the app in the truck. So every job is entered twice. {#double_entry}
+marcus: Do you have a sense of what that costs you?
+rachel: We did a time study last year. It's about twenty-two minutes per job of re-entry and fixing errors. {#metric_minutes}
+rachel: Across roughly nine thousand jobs a month, that's a lot of hours.
+omar: It's about thirty-three hundred hours a month. I ran the numbers for the business case.
+marcus: Thirty-three hundred hours a month. That's real.
+rachel: And that's before you count the errors. We had a compliance audit flag last quarter because temperature readings were transcribed wrong.
+marcus: What happened with that?
+rachel: A fine, and a very unpleasant meeting with our VP. I'd rather not repeat it. {#compliance_pain}
+[pause 1]
+marcus: So if this goes well, what does success look like for you a year from now? {#ch_metrics}
+rachel: Re-entry time goes to basically zero. Temperature data captured once, at the equipment, with a timestamp.
+rachel: And I want first-time fix rate up. Right now it's about seventy-one percent. I'd love to see eighty.
+marcus: Why does first-time fix matter so much to you specifically?
+rachel: Because every repeat visit is a truck roll, and a truck roll costs us about three hundred and eighty dollars all-in. {#truck_roll}
+jordan: Is the first-time fix problem mostly parts, or mostly information?
+rachel: Information, mostly. The tech shows up without the asset history, doesn't know what the last person did, and guesses.
+jordan: That's one of the strongest parts of our product, the asset history on the work order. I'll make sure we show you that properly.
+[pause 1]
+marcus: Okay. Can I ask about the decision itself? Who's involved in choosing a platform like this? {#ch_process}
+rachel: I'm the one driving it. I own field operations, and the budget is mine.
+rachel: But anything over two hundred and fifty thousand needs sign-off from our CFO, Daniel. {#econ_buyer}
+marcus: Have you talked to Daniel about this project yet?
+rachel: Informally. He's supportive, but he'll want to see the business case. Omar's numbers will help.
+marcus: And Omar, where does IT come in?
+omar: Security review, and integration with the ERP. Those are my two gates.
+omar: Security is the bigger one. We have a vendor risk process, and it's strict. We had a breach at a vendor two years ago, so everyone's careful now.
+marcus: What does the vendor risk process require?
+omar: SOC 2 Type Two report, SAML single sign-on, and a pen test summary within the last twelve months. {#criteria}
+omar: Those are hard requirements. Not nice-to-haves. I can't get an exception on any of them.
+jordan: I want to be upfront about where we are on those, because I'd rather you hear it from us.
+jordan: We don't have a SOC 2 Type Two report today. We're targeting the start of the observation window in early January.
+jordan: SSO is on the roadmap for Q1, and we're sequencing it early.
+omar: Okay. Appreciate the honesty. Most vendors hand-wave on that question.
+omar: A target date with a bridge letter might be enough to let us start procurement, but I can't sign the final contract without the report. {#bridge}
+marcus: Understood. That's helpful.
+marcus: And what about the paper side? Legal, procurement, how long does that usually take for you?
+omar: Procurement is about six weeks once security clears. Legal is usually two to three weeks in parallel. {#paper}
+rachel: And we'd want to start with a pilot in two regions before rolling out everywhere.
+marcus: That's what we'd recommend too. Which regions?
+rachel: Columbus and Atlanta. Columbus because dispatch is there, Atlanta because it has the worst freezer problem.
+[pause 1]
+marcus: Can I ask who else you're looking at? {#ch_competition}
+rachel: We're talking to one other vendor seriously. I'd rather not say who, but they're bigger than you.
+marcus: That's fair. What do you like about them?
+rachel: They already have SSO and the SOC 2 report. Omar loves that.
+omar: I do love that.
+rachel: But their offline story is weak. Their demo crashed when we turned off the Wi-Fi. Which was kind of funny, honestly.
+jordan: Did they have an answer for it?
+rachel: They said offline is on their roadmap for next year.
+marcus: So if we had both, offline and the enterprise security pieces, where would that leave us?
+rachel: Honestly, in a strong position. Offline is the thing my technicians will actually notice. Omar's requirements are the thing that gets it through the door.
+marcus: That's a really clear way to put it.
+[pause 1]
+marcus: Okay, I want to be respectful of time. Let me suggest next steps. {#ch_next}
+marcus: One, I'll send Omar our security overview and the timeline for SOC 2 and SSO, including a draft bridge letter. {#ai_security_pack}
+omar: That would help. Send it to me directly.
+marcus: Two, Jordan, can we set up a technical demo focused on offline and asset history? Ideally with a tablet in a freezer, if Rachel's game.
+rachel: Oh, I am absolutely game. We have a test freezer in Columbus.
+jordan: I love that. Let's do it in person. I'll get the offline beta build on a tablet for the demo. {#ai_demo}
+marcus: Three, Rachel, would you be open to a short call with Daniel, so we can understand what he needs in the business case?
+rachel: Yes. I'll ask him. He's traveling next week, so it might be the week after. {#ai_cfo}
+marcus: Perfect. And I'll draft a business case outline using Omar's numbers, so you have something to bring him.
+omar: That works.
+rachel: One question before we go. What's your pricing look like for four hundred technicians? Ballpark.
+marcus: Ballpark, for that size, with the enterprise tier, somewhere in the range of four-fifty to five-fifty a year, depending on modules.
+rachel: Okay. That's in range. Not cheap, but in range.
+marcus: I'll put a proper proposal together after the demo.
+rachel: Great. Thanks, both of you. This was genuinely useful.
+jordan: Thank you. Talk soon.

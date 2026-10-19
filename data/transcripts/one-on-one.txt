@@ -1,0 +1,78 @@
+# id: one-on-one
+# 1:1 between Jordan (Head of Product) and Maya (VP Engineering). Weekly.
+maya: Hey. Sorry, my last meeting ran over. Give me one second to close about forty tabs. {#ch_checkin}
+jordan: No rush. I'm just finishing a message to Lena.
+maya: Okay. I'm here. How are you doing? Like actually, not the Slack version.
+jordan: Honestly? A bit stretched. Planning season plus the Orchard escalation plus hiring is a lot at once.
+maya: Yeah, I can see it in the doc comments at eleven p.m.
+jordan: Ha. Fair. I should stop doing that.
+maya: You should, partly because it sets a norm for your team, even if you don't mean it to.
+jordan: That's a good point. Okay, noted. I'll schedule-send things.
+maya: Okay, I have three things, but you go first. What's on your list?
+jordan: Four things, but they're short. The planning doc, the PM hire, the Orchard escalation, and a piece of feedback for you, actually.
+maya: Ooh. Okay, save the feedback for last.
+[pause 1]
+jordan: So the planning doc. I wanted your honest read before Thursday. {#ch_planning}
+maya: Honest read is it's good, but it reads like a product doc that's trying to avoid an argument.
+jordan: Ouch. Say more.
+maya: You list offline and enterprise readiness as co-equal priorities. They're not co-equal. We can't staff both at full scope, and everyone in that room is going to know it.
+maya: Marcus is going to come in with his three deals and push hard for SSO, and if the doc doesn't take a position, the loudest person wins.
+jordan: I was hoping to let the meeting arrive at the position.
+maya: That works if you go in with a recommendation and let them push on it. It doesn't work if you go in neutral. Neutral just invites a fight.
+jordan: Okay. So you'd want me to recommend offline first?
+maya: I'd want you to recommend whatever you actually believe, with the numbers next to it. I believe offline first, but it's your call, not mine.
+jordan: I think I believe a narrow offline first, honestly. Sofia's research changed my mind on the scope.
+maya: Then write that down. And put the capacity number in there, fourteen engineer-months. People keep assuming twenty. {#cap14}
+jordan: Will do. I'll revise it tomorrow morning and send it to you before it goes wide. {#ai_revise_doc}
+maya: Great.
+[pause 1]
+jordan: Second thing, the PM hire. We have two finalists and I'm kind of torn. {#ch_hiring}
+maya: The one from the logistics startup and the one from the big company?
+jordan: Exactly. The startup one has domain knowledge, she's actually shipped field service software. The big company one is more polished, better at stakeholder stuff.
+maya: Which gap is bigger on your team right now?
+jordan: Domain, honestly. Nobody on my team has ever been on a job site.
+maya: Then I think you know the answer. Polish you can coach. Domain takes years.
+jordan: Yeah. Can you do a thirty-minute chat with her this week? I want an engineering read on how she writes specs.
+maya: Sure, send me a slot. Thursday afternoon is open-ish.
+jordan: I'll book Thursday at three. {#ai_book_chat}
+[pause 1]
+jordan: Third, Orchard. Aisha's been carrying the escalation, but I think it needs an engineering owner. {#ch_orchard}
+maya: Is it still the photo uploads?
+jordan: Photo uploads and the form drafts disappearing on iOS. Greg, their ops manager, is basically losing patience.
+maya: The draft bug, Dev said is about two weeks. I can probably get it into the next sprint if I move the reporting cleanup.
+jordan: Would you? Even just being able to tell Greg "it's in the sprint" would buy us time.
+maya: Let me confirm with Dev first, I don't want to promise his time without asking. I'll tell you by Wednesday. {#ai_confirm_dev}
+jordan: That's totally fair.
+maya: And honestly, I'd like Dev to be on the next call with Orchard. Customers trust engineers more than they trust either of us on bugs.
+jordan: Ha, that's true. I'll ask Aisha to add him.
+[pause 1]
+jordan: Okay. Feedback. {#ch_feedback}
+maya: Go for it.
+jordan: In the design review last week, when Priya was presenting the queue UI, you jumped in pretty early with the architecture concerns.
+jordan: The concerns were right, but I think it kind of took the air out of the room for her. She didn't say much for the rest of the meeting.
+maya: Hmm. Yeah. I noticed she went quiet and I didn't connect it to me.
+jordan: It might not be all you. But she's newer, and I think she reads you as the final word on technical stuff.
+maya: That's fair. I'll talk to her, and next time I'll hold my concerns until she's walked through the whole thing. {#ai_talk_priya}
+jordan: Thanks. I know that's not fun to hear.
+maya: No, it's useful. Honestly, I'd rather hear it from you than find out in a skip-level six months from now.
+maya: Okay, can I give you one back?
+jordan: Please.
+maya: You say yes to Marcus too fast. Not on big things, but on small requests, like a custom field for a prospect or a demo build.
+maya: Each one is small, but they add up, and my team feels like the roadmap moves every time a deal gets close.
+jordan: Oof. Yeah. I think that's true.
+maya: I'm not saying never. I'm saying route them through the weekly triage, so we see them all in one place.
+jordan: That's fair. I'll tell Marcus that anything for a specific deal goes through triage starting next week. {#ai_triage}
+maya: Thank you. That would help a lot.
+[pause 1]
+maya: My last thing is quick. How are you feeling about the head of product role, like six months in? {#ch_growth}
+jordan: Better than at three months. I feel less like I'm faking it. But I still feel like I'm in the weeds too much.
+maya: What would you stop doing if you could?
+jordan: Writing every spec myself. I need the PM hire, honestly, that's most of it.
+maya: Then that's the most important thing on your plate. More than the planning doc.
+jordan: Huh. Yeah. Okay.
+maya: Is there anything you need from me on it?
+jordan: Just the chat with the candidate on Thursday. And maybe tell me if I'm being too picky.
+maya: I'll tell you. I'm good at that.
+jordan: You really are.
+maya: Okay, I've got to run to the infra sync. Same time next week?
+jordan: Same time next week. Thanks, Maya.

@@ -1,0 +1,33 @@
+# id: kickoff
+# Kessler Field Services pilot kickoff. Run by Aisha and Marcus; Jordan was not on this call.
+aisha: Okay, welcome everyone. Victor, Claire, thanks for joining. This is the official kickoff for the pilot. {#ch_goals}
+victor: Glad to be here. We've been waiting for this for a while.
+marcus: We're excited too. I'll hand it to Aisha, she's going to run the pilot day to day.
+aisha: Thanks. So my goal for today is to agree on three things. What success looks like, the timeline, and who does what.
+aisha: Victor, can you start with what you need to see at the end of the pilot to roll out more broadly? {#q_success}
+victor: Sure. Three things. Technicians actually use it, meaning more than eighty percent of jobs closed in the app.
+victor: Second, dispatch saves time. Claire's team spends about two hours a day on phone calls chasing job status. I want that cut in half. {#metric_dispatch}
+victor: And third, it has to pass our security review before we sign the full contract.
+marcus: On security, we've shared the overview, and we're targeting the SOC 2 observation window for early January.
+victor: Understood. Our procurement team wants the actual report, not just the timeline. Just so that's clear. {#report_required}
+marcus: Totally clear. We'll keep you updated.
+[pause 1]
+aisha: Claire, tell me about dispatch today. What's the hardest part of the day? {#ch_dispatch}
+claire: Mornings. Between seven and nine, every technician calls in to confirm their jobs, and half the time something's changed.
+claire: Then in the afternoon, I'm calling them to find out if jobs are done, because the old system doesn't update until they're back in the office.
+aisha: So the status visibility is the biggest win for you.
+claire: By far. If I could see job status in real time, I'd get my afternoons back.
+aisha: That's exactly what the dispatcher board does. We'll make sure your team is trained on it in week one.
+claire: Great. And can we customize the job statuses? We use different stages than most companies.
+aisha: Yes. We'll configure your statuses during setup. Send me your current list and I'll map it. {#ai_statuses}
+[pause 1]
+aisha: Okay, timeline. I'm proposing a ten-week pilot, starting September fourteenth, with twenty technicians in your Philadelphia region. {#ch_timeline}
+victor: Ten weeks works. Philadelphia is a good choice, it's our most organized region.
+aisha: Week one is setup and training. Weeks two through eight, we run it and check in every week. Weeks nine and ten, we measure against your success criteria.
+claire: Who do we call if something breaks?
+aisha: Me, first. I'll give you my direct line, and we'll set up a shared channel for your team. {#ai_channel}
+victor: Sounds good. And who on our side owns the pilot?
+claire: I can own it. I'm the one who'll feel the pain if it doesn't work.
+victor: Good. Claire owns it.
+aisha: Perfect. I'll send a kickoff summary with the success criteria, the timeline, and the owners by tomorrow. {#ai_summary}
+victor: Thanks, Aisha. Thanks, Marcus. Let's make this work.

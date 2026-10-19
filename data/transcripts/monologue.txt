@@ -1,0 +1,35 @@
+# id: monologue
+# Solo technical walkthrough, recorded by Dev for the team. Includes speech-to-text errors
+# the summary corrects: "see are DTs" = CRDTs, "vector clucks" = vector clocks,
+# "idem potent" = idempotent, "SQL light" = SQLite.
+dev: Okay, this is a recording for the team, explaining how I'm thinking about the sync engine for the upload queue. {#ch_problem}
+dev: The goal is simple to say and hard to build. A technician should never lose work, no matter what the network does.
+dev: Today, the app sends every change straight to the server. If the request fails, the change is just gone.
+dev: So the first principle is that every change gets written to the device first, and only then sent to the server.
+dev: On Android, the local store is SQL light. On iOS it's also SQL light, through a thin wrapper. {#local_store}
+dev: The second principle is that every change gets a unique ID, generated on the device.
+dev: That means if we send the same change twice, which will happen on flaky networks, the server can recognize the duplicate and ignore it.
+dev: In other words, every write has to be idem potent. That's non-negotiable. {#idempotent}
+[pause 2]
+dev: Okay, conflicts. This is where it gets interesting. {#ch_conflicts}
+dev: A conflict happens when two devices change the same field before either one has synced.
+dev: There are basically three ways to handle it.
+dev: One, last-write-wins. Whichever change has the latest timestamp wins, and the other is discarded.
+dev: Two, you use vector clucks to detect that two changes were concurrent, and then ask a human to resolve it.
+dev: Three, you use see are DTs, data structures that merge automatically without conflicts. {#crdt_option}
+dev: See are DTs are beautiful, but they're a big investment, and they make every feature harder to build afterwards.
+dev: For version one, I'm proposing last-write-wins, plus a conflict log. {#lww_proposal}
+dev: The server keeps the losing change, so the office can see what was overwritten, and restore it if needed.
+dev: Research says conflicts are rare, so this is the right trade-off for now.
+dev: One risk with last-write-wins is clock skew. Device clocks can be wrong by minutes.
+dev: So we'll use the server's receive time, not the device time, to decide the winner. {#server_time}
+[pause 2]
+dev: Last part, photos. Photos are different because they're big. {#ch_photos}
+dev: A job can have fifteen photos at five megabytes each. On a weak connection, that's minutes of uploading.
+dev: So photos get their own queue, separate from the form data. The form syncs first, because it's small and the office needs it.
+dev: Photos upload in the background, one at a time, with resumable uploads, so a dropped connection doesn't restart from zero. {#resumable}
+dev: And we back off exponentially when uploads fail, so we don't drain the battery retrying every second.
+dev: Open question I don't have an answer to yet: what happens if the device is wiped before the queue drains? {#q_wipe}
+dev: Some medical customers wipe tablets every night. If that happens, queued work is lost, which is exactly what we're trying to prevent.
+dev: I need numbers on how many customers do that before I can design around it.
+dev: Okay, that's it. Questions in the doc comments, please. Thanks.

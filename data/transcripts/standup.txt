@@ -1,0 +1,38 @@
+# id: standup
+# Atlas engineering daily standup.
+maya: Morning, everyone. Let's go in the usual order. Priya, you're up. {#ch_round}
+priya: Morning. Yesterday I finished the status pill component, the one that shows "saved on device" and "waiting for signal."
+priya: It's behind a feature flag, so it's not visible to anyone yet.
+priya: Today I'm wiring it up to the fake network toggle so Sofia can test it on the tablet. {#priya_today}
+priya: No blockers, except I need the design tokens for the warning state. I think Sofia's still finalizing those.
+jordan: I'll ping Sofia after this and get you the tokens by lunch. {#ai_tokens}
+priya: Thanks.
+maya: Ben?
+ben: Yeah. So yesterday was mostly audit logging. I got the shared logging library into the work order service and the photo store.
+ben: Both are emitting events into the new pipeline, and I checked the format against Tom's list of required fields.
+ben: Today, the auth service. That's the scary one because it has the old session code.
+ben: Blocker, kind of. The staging database for auth is still on the old post gress version, so my migration tests fail there. {#ben_blocker}
+dev: Oh, that's my fault. I paused the staging upgrade last week because of the sync tests. I'll finish it this morning.
+ben: Great, then not a blocker.
+dev: Give me until eleven. {#ai_staging}
+maya: Dev, you're next anyway.
+dev: Yeah. So yesterday I mostly wrote the spike doc for the upload queue. It's about seventy percent done.
+dev: The conflict section is done, last-write-wins with a conflict log, like we discussed in planning.
+dev: The part I'm stuck on is the device wipe question. Two of the medical customers wipe tablets every night, and I don't know yet if queued work survives that. {#dev_wipe}
+dev: So that section has a big placeholder in it.
+jordan: Aisha's checking how many customers do that. She said she'd have numbers today, I'll chase it.
+dev: That would unblock me. Today I'm finishing the staging upgrade for Ben, then the rest of the doc.
+maya: Is the doc still on track for Friday?
+dev: Friday, yes. Possibly with an asterisk on the wipe section.
+maya: An asterisk is fine. Just call it out.
+maya: Jordan, anything from product?
+jordan: Two quick ones. The decision memo from planning is out, please read it if you haven't. It has both decisions and the open questions.
+jordan: And the form persistence fix, the iOS drafts one, Orchard is asking about it daily. Where are we?
+dev: It's in this sprint. Priya's picking it up after the pill work.
+priya: I can start it Tuesday. It's mostly saving form state to local storage on background.
+jordan: Tuesday's great. Can I tell Orchard it ships next week?
+priya: Next week as a beta build, probably. Production the week after, if QA is happy.
+jordan: I'll say "the week after next" to be safe. {#jordan_orchard}
+maya: Good. Last thing from me. I'm out Monday, so Dev's running Monday standup.
+dev: I'll keep it under ten minutes. Maybe.
+maya: That's all. Thanks everyone.

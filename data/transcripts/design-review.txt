@@ -1,0 +1,49 @@
+# id: design-review
+# Offline mode design review. Sofia presents, Priya walks through the queue UI.
+sofia: Okay, let's get started. Today is the offline experience, specifically the status indicator and the upload queue. {#ch_context}
+sofia: I'll give context, then Priya will walk through the queue screens she's been prototyping.
+sofia: The principle from research is simple. Technicians don't want an offline mode. They want the app to never lose their work.
+dev: Which I'm fully on board with, as long as "never" has some asterisks.
+sofia: There will be asterisks. That's partly what this review is for.
+sofia: So here's the status pill. It sits at the top of the work order. Three states: saved on device, waiting for signal, and synced. {#pill_states}
+jordan: Why three and not two?
+sofia: Because "saved on device" and "waiting for signal" mean different things to a technician. One means "your work is safe." The other means "it hasn't reached the office yet."
+sofia: In testing, the technicians cared about both, separately.
+jordan: Okay, that makes sense.
+[pause 1]
+sofia: Priya, take it away. {#ch_queue}
+priya: Thanks. So when you tap the pill, you get the queue. It lists everything waiting to upload, grouped by job.
+priya: Each item shows a thumbnail, the size, and how long it's been waiting.
+priya: And there's a retry button at the top, which retries everything.
+dev: What happens if they retry while it's already retrying?
+priya: Right now, nothing. The button is disabled while an upload is running.
+dev: Okay, good. Duplicate uploads are my nightmare.
+priya: For failed items, there's a red badge, and if you tap it, you see the error in plain language. Like, "The connection dropped. We'll try again automatically." {#plain_errors}
+sofia: We tested a version with technical error codes, and technicians found it scary. Plain language tested much better.
+jordan: Love that.
+priya: And this is the dispatcher side. On the dashboard, jobs with unsynced work get a small cloud icon.
+priya: If you hover, it shows "Four photos waiting on Hana's tablet, last seen twenty minutes ago."
+dev: "Last seen" is tricky. We only know when the device last checked in, not whether it has signal.
+priya: Oh, good point. Should it say "last checked in" instead?
+dev: Yeah. It's more honest.
+priya: Okay, I'll change the copy. {#ai_copy}
+[pause 1]
+dev: Can I raise the big question? What happens with conflicts? {#ch_conflicts}
+dev: Like, the technician edits a work order offline, and the office edits the same one at the same time.
+sofia: From the research, it's rare. But it does happen, mostly with the job notes.
+dev: My proposal is last-write-wins, with a conflict log that the office can review. Merging fields automatically is a much bigger project.
+priya: Then the UI needs a way for the office to see conflicts. I haven't designed that yet.
+sofia: Let's add a simple conflict list to the dispatcher view. Version one can be ugly.
+jordan: Does the technician ever need to know there was a conflict?
+sofia: Hmm. I don't know. I can see arguments both ways. {#q_tech_conflict}
+dev: My instinct is no, but I'd want to see the research.
+sofia: Let's leave it open and test it.
+[pause 1]
+jordan: What's the timeline for a clickable prototype on a tablet? {#ch_next}
+priya: The queue screens are almost done. I can have a clickable version with fake data in about two weeks.
+sofia: Then I'll book the technician sessions for right after that.
+dev: I'll need to give you a fake network toggle so you can simulate dropping the connection.
+priya: That would be great, thank you.
+dev: I'll add it to the dev build by Friday. {#ai_toggle}
+sofia: Great. And I'll write up the open questions from today, including the conflict one, and share them with the team. {#ai_writeup}
+sofia: Thanks, everyone. Good review.

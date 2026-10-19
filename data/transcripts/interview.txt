@@ -1,0 +1,59 @@
+# id: interview
+# Senior Product Designer interview. Sofia leads, Jordan joins. Candidate: Elena Ruiz.
+sofia: Hi Elena, thanks for coming in. Can you hear us okay? {#ch_intro}
+elena: Yes, perfectly. Thanks for having me.
+sofia: Great. I'm Sofia, I lead design here, and this is Jordan, who runs product.
+jordan: Hi Elena. Nice to meet you.
+sofia: So the plan is short. I'll ask about a project you're proud of, Jordan will ask some product questions, and then you'll have time for yours.
+elena: Sounds good.
+sofia: Let's start with you. Give us the two-minute version of your background. {#q_background}
+elena: Sure. I've been a product designer for about eight years. I started in agency work, then spent four years at a logistics company designing apps for warehouse workers.
+elena: For the last two years I've been at a healthcare scheduling startup, leading design for their mobile app for home-care nurses.
+elena: So I've spent most of my career designing for people who aren't at a desk, which I think is why I applied here.
+[pause 1]
+sofia: Tell us about a project you're proud of. Walk us through it like we weren't there. {#ch_project}
+elena: Okay. At the healthcare startup, nurses were missing visit notes. They'd finish a home visit and forget to write it up, or write it hours later from memory.
+elena: The first instinct from leadership was to add reminders, more notifications.
+elena: I pushed back on that, because the nurses already had something like forty notifications a day. Adding one more wasn't going to work.
+sofia: What did you do instead?
+elena: I did ride-alongs. I spent three days in cars with nurses, going to visits.
+elena: And what I noticed was that the notes weren't hard to write, they were hard to write at the right moment. The nurse would leave the house, get in the car, and immediately get a call about the next visit.
+elena: So we redesigned the note so it could be done in about ninety seconds by voice, right at the door, before they got in the car. {#voice_notes}
+jordan: What happened to the numbers?
+elena: Late notes dropped by about sixty percent in the first two months. And note quality went up, which surprised us. {#sixty_percent}
+sofia: Why do you think quality went up?
+elena: Because they were writing it while the visit was fresh, not three hours later.
+sofia: What would you do differently?
+elena: I'd involve engineering in the ride-alongs earlier. The voice transcription was harder to build than I expected, and if the engineers had seen the context, we'd have made better trade-offs sooner.
+sofia: That's a good answer. I like that.
+[pause 1]
+jordan: Can I ask a product question? {#ch_product}
+elena: Of course.
+jordan: Say you had research showing technicians want the app to work offline, and sales showing big customers want enterprise security features. You can only design one well this quarter. How do you think about it?
+elena: Hmm. Honestly, I'd want to know which problem causes people to leave, and which one stops people from joining.
+elena: Usually the problem that makes people leave is more urgent, because you're losing something you already paid to acquire.
+elena: But I'd also want to know whether the security features need much design at all. Things like single sign-on are often more engineering than design.
+jordan: That's a really sharp point, actually. SSO is mostly a login screen.
+elena: Right. So I might be able to do both, if one of them is mostly a settings page.
+sofia: How do you handle disagreements with product managers?
+elena: I try to separate what we disagree on. Usually it's either the problem, the evidence, or the solution.
+elena: If we disagree on the solution but agree on the problem, I'll prototype both and test them. That ends most arguments quickly.
+elena: If we disagree on the evidence, I'll go get more. If we disagree on the problem, that's a bigger conversation, and I'd pull in whoever owns the strategy. {#disagree}
+jordan: I like that a lot.
+sofia: How do you think about design systems? We have a small one, and it's a bit messy.
+elena: I'm pragmatic about it. I think a design system should follow the product, not lead it. I've seen teams spend six months on a system and ship nothing.
+elena: I'd start by finding the five components that are used everywhere and making those really solid.
+[pause 1]
+sofia: Okay, let's leave the rest for you. What questions do you have for us? {#ch_questions}
+elena: What's the biggest design problem you're facing right now?
+sofia: Offline, for technicians. Making the app feel trustworthy when the network isn't.
+elena: Oh, that's a great problem. That's exactly what I worked on with the nurses, honestly. Rural visits had terrible signal.
+elena: How big is the design team?
+sofia: It's me and one other designer. You'd be the third.
+elena: And what does success look like in the first six months for this role?
+sofia: Owning the technician mobile experience end to end. Including the offline work.
+elena: Last one. How do you make decisions when design and engineering disagree on scope?
+jordan: Honestly, we're still figuring that out. It depends a lot on the project. I don't have a clean answer for you. {#q_scope_unanswered}
+elena: I appreciate the honesty.
+sofia: Thank you, Elena. We'll get back to you by end of next week.
+elena: Thank you both. This was a really good conversation.

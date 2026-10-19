@@ -1,0 +1,49 @@
+# id: customer-call
+# Orchard Health quarterly check-in. Aisha (CS) and Jordan with Greg and Hana.
+aisha: Hi Greg, hi Hana. Thanks for joining. I know this quarter's been rough on the app side. {#ch_open}
+greg: It has. I'm not going to pretend it hasn't.
+aisha: I appreciate that. I'd rather hear it straight.
+aisha: I brought Jordan, who leads product, so you can hear directly where things are.
+jordan: Hi Greg, hi Hana. Thanks for being candid with Aisha. It really helps us.
+greg: Sure. Hana runs dispatch, so she sees the day-to-day pain more than I do.
+hana: I see all of it. Every single call. {#ch_issues}
+aisha: Can we start with the photo uploads? That's been the biggest one in the tickets.
+hana: Yeah. So the techs take the photos, the app says it's uploading, and then nothing. They drive off and the photos never show up.
+hana: Then I have to call them, and they're forty minutes away at the next job.
+greg: Last month we had a hospital customer reject an invoice because the inspection photos were missing. {#invoice_reject}
+greg: That's real money, and frankly, it's embarrassing.
+jordan: I'm really sorry. That's exactly the kind of thing that shouldn't happen.
+jordan: Can I ask, when the photos fail, does the tech get any error message at all?
+hana: No. That's the worst part. It just looks like it worked. {#silent_fail}
+jordan: Okay. That's a big part of what we're fixing. We're building an upload queue that keeps photos on the device until they actually send, and shows the tech what's still waiting.
+greg: When?
+jordan: An early version goes into beta in the spring. Android first. I'd like Orchard to be one of the first beta customers, if you're open to it.
+greg: We're open to it. We're mostly Android anyway.
+hana: Will the office see it too? Like, will I know if photos are stuck on someone's tablet?
+jordan: Yes. The dispatcher view shows a small indicator on the job if there's unsynced work.
+hana: Oh, that alone would save me ten calls a day.
+aisha: And the second issue, the forms disappearing on iPads?
+hana: Right. The supervisors use iPads, and if they switch apps, the form they were filling is gone when they come back.
+jordan: That one we have a fix for already. It's in our current sprint, and it should be in production the week after next. {#ios_fix}
+greg: Okay, that's good to hear. A real date.
+aisha: I'll confirm the exact day as soon as it's released, and I'll walk Hana's team through it. {#ai_confirm_release}
+[pause 1]
+greg: Can I raise something that's not a bug? {#ch_renewal}
+aisha: Of course.
+greg: Our renewal is in February. My boss asked me last week if we should look at other options.
+greg: I told him not yet, but I need to show him things are improving by then. Otherwise it's out of my hands.
+aisha: That's completely fair, and thank you for telling us now rather than in February.
+jordan: What would "improving" look like to your boss? What would he want to see?
+greg: Fewer missing photos, measurably. And no more rejected invoices.
+greg: If I can show him the photo issue dropping by half by January, I think we're fine.
+aisha: Could we track that together? I can send you a monthly report on failed uploads from our side.
+greg: That would actually be really useful. I can forward it straight to him.
+aisha: I'll set it up and send the first one at the start of November. {#ai_monthly_report}
+hana: And can someone from engineering join our next call? No offense, but I'd like to hear it from the person fixing it.
+jordan: None taken. I'll bring Dev, he's the engineer leading the upload work. {#ai_bring_dev}
+[pause 1]
+aisha: Anything else before we wrap up? {#ch_wrap}
+hana: One thing. Is there any way the techs can see their photos are uploading before the queue thing is built? Even just a progress bar? {#q_progress}
+jordan: That's a good question. I don't know if we can do it faster than the full fix. Let me check with the team.
+greg: Okay. Thanks, both. I appreciate you being straight with us.
+aisha: Thank you, Greg. Thank you, Hana. Talk soon.

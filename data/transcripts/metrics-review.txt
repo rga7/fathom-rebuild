@@ -1,0 +1,40 @@
+# id: metrics-review
+# Weekly metrics review. Jordan hosts with Maya, Marcus, Aisha, Lena.
+jordan: Okay, let's do metrics. I'll go fast, stop me if something looks weird. {#ch_revenue}
+jordan: New ARR for August closed at six hundred and twenty thousand, against a plan of six-fifty. {#aug_arr}
+marcus: Two deals slipped into September. Both are verbal yeses, just waiting on paperwork.
+jordan: Which two?
+marcus: The regional HVAC group and the elevator company in Denver. Both should close in the next two weeks.
+jordan: Okay. Pipeline coverage for Q3?
+marcus: About two point eight times. A bit thin. I'd like three.
+jordan: What's making it thin?
+marcus: Honestly, enterprise deals stalling on security. I'm seeing SSO and SOC 2 come up in almost every deal over a hundred K. {#security_trend}
+jordan: Can you put a number on that?
+marcus: Let me pull it for next week. My gut says five or six deals, but I don't want to guess. {#ai_marcus_count}
+[pause 1]
+jordan: Retention. Aisha? {#ch_retention}
+aisha: Gross churn in August was four accounts. That's higher than our monthly average of about three.
+aisha: Three of the four mentioned the app losing work when technicians are offline. {#churn_aug}
+lena: Is that new? I feel like I keep hearing that one.
+aisha: It's not new, it's getting louder. It was maybe a third of churn reasons last year, now it's over half.
+maya: Do we know if it's mostly Android or iOS?
+aisha: Mostly Android, but that's also where most of the technicians are.
+jordan: Can you put together a proper breakdown of churn reasons for the last two quarters? I think we'll need it for planning.
+aisha: Yes. I'll have it before the planning offsite. {#ai_churn_breakdown}
+[pause 1]
+jordan: Product usage. Lena, you had the activation numbers? {#ch_usage}
+lena: Yes. Activation, meaning a customer completes their first work order in the first fourteen days, is at sixty-eight percent.
+lena: That's up from sixty-one last quarter, mostly because of the new onboarding checklist.
+jordan: That's great. Nice work.
+lena: The weak spot is forms. Only about forty percent of accounts turn on custom forms in the first month, and forms are where most of the value is.
+maya: Is that a discoverability problem, or a setup-is-too-hard problem?
+lena: I think setup is too hard. Building a form takes about forty minutes today.
+jordan: Could we ship form templates? Like, a standard HVAC inspection form, ready to go?
+lena: That's my hope. Sofia's team looked at it, but it hasn't been prioritized. {#forms_templates}
+[pause 1]
+jordan: Last one, engineering. Maya? {#ch_eng}
+maya: Uptime was ninety-nine point nine six percent. One incident, the photo store had a forty-minute outage on the twelfth.
+maya: Root cause was a certificate that expired. We've added monitoring so it doesn't happen again.
+jordan: Embarrassing but fixable. Thanks for the quick write-up.
+maya: Deploy frequency is up, about eleven deploys a week. And the post gress upgrade is scheduled for Q1.
+jordan: Okay. That's everything. Thanks all, same time next week.
