@@ -5,12 +5,14 @@ import type { Meeting } from "@/data/types";
 import { SharedView, type SharedClip } from "@/components/meeting/SharedView";
 import { decodeClip, seedHighlight } from "@/lib/highlights";
 import { durationSec } from "@/lib/derive";
+import { isTranscriptOnly } from "@/lib/capture";
 
 // Seeded highlights have short ids and are prerendered. Viewer-made highlights
 // live only in that viewer's browser, so their id carries the clip itself
 // ("c" + base64url JSON) and is decoded here on demand.
 function resolve(id: string): { meeting: Meeting; clip: SharedClip } | null {
-  for (const m of MEETINGS) {
+  // A clip is a playable range; transcript-only calls have no recording, so they have no clip links.
+  for (const m of MEETINGS.filter((x) => !isTranscriptOnly(x))) {
     const h = m.highlights.find((x) => x.id === id);
     if (h) {
       const v = seedHighlight(m, h);
@@ -20,12 +22,12 @@ function resolve(id: string): { meeting: Meeting; clip: SharedClip } | null {
   const c = decodeClip(id);
   if (!c) return null;
   const meeting = getMeetingByToken(c.token);
-  if (!meeting || c.start > durationSec(meeting)) return null;
+  if (!meeting || isTranscriptOnly(meeting) || c.start > durationSec(meeting)) return null;
   return { meeting, clip: { id, type: c.type, start: c.start, end: Math.min(c.end, durationSec(meeting)), title: c.title } };
 }
 
 export function generateStaticParams() {
-  return MEETINGS.flatMap((m) => m.highlights.map((h) => ({ id: h.id })));
+  return MEETINGS.filter((m) => !isTranscriptOnly(m)).flatMap((m) => m.highlights.map((h) => ({ id: h.id })));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {

@@ -3,11 +3,12 @@ import { useRef, useState } from "react";
 import type { Meeting } from "@/data/types";
 import { person } from "@/data/people";
 import { activeLineIndex, chapterAt, lineStart } from "@/lib/derive";
+import { useCaptureMode } from "@/lib/captureMode";
 import { clock } from "@/lib/format";
 import type { Highlight } from "@/lib/highlights";
 import { HIGHLIGHT_META } from "@/lib/highlights";
 import { Avatar } from "../Avatar";
-import { IconBack10, IconFwd10, IconPause, IconPlay } from "../icons";
+import { IconBack10, IconFwd10, IconList, IconPause, IconPlay } from "../icons";
 import { usePlayer, usePlayerStore } from "./context";
 import { Narrator } from "./Narrator";
 
@@ -16,6 +17,7 @@ function Stage({ meeting }: { meeting: Meeting }) {
   const idx = usePlayer((s) => activeLineIndex(meeting.lines, s.time));
   const playing = usePlayer((s) => s.playing);
   const chapter = usePlayer((s) => chapterAt(meeting, s.time)?.id);
+  const [mode] = useCaptureMode();
   const line = meeting.lines[Math.max(0, idx)];
   const p = person(line.speaker);
   const chapterTitle = meeting.chapters.find((c) => c.id === chapter)?.title;
@@ -30,7 +32,7 @@ function Stage({ meeting }: { meeting: Meeting }) {
         title="Simulated playback: there is no audio or video. A clock drives the transcript."
         className="absolute left-2 top-2 rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/70"
       >
-        Simulated
+        Simulated{mode === "video" ? " · Video & Audio" : ""}
       </span>
       {chapterTitle && (
         <span className="absolute right-2 top-2 max-w-[70%] truncate rounded bg-black/50 px-1.5 py-0.5 text-[11px] text-white/80">{chapterTitle}</span>
@@ -194,6 +196,21 @@ export function Controls({ meeting, children }: { meeting?: Meeting; children?: 
       >
         {rate}x
       </button>
+    </div>
+  );
+}
+
+/** Shown instead of the player for transcript-only calls. */
+export function TranscriptOnlyNotice() {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-line bg-panel px-3.5 py-3" data-testid="transcript-only-notice">
+      <span className="rounded-full bg-white/5 p-2 text-muted">
+        <IconList size={16} />
+      </span>
+      <div className="min-w-0 text-[13px]">
+        <p className="font-medium text-fg">Transcript only: no recording saved</p>
+        <p className="text-[12px] text-muted">There is no player. Times are shown for reference; lines can&apos;t be played.</p>
+      </div>
     </div>
   );
 }

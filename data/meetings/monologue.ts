@@ -6,6 +6,7 @@ export const monologue: Meeting = {
   shareToken: "RnbmXj09LaY8ks62o1yD",
   title: "Sync engine walkthrough (solo)",
   kind: "monologue",
+  capture: "transcript",
   startedAt: "2026-10-16T23:00:00Z",
   hostId: "dev",
   participants: ["dev"],

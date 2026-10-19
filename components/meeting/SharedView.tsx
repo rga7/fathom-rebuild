@@ -12,7 +12,8 @@ import { useCopy } from "../Toaster";
 import { IconLink, IconList, IconPlay, IconSparkle } from "../icons";
 import { PlayerProvider, usePlayer, usePlayerStore } from "../player/context";
 import { TypeBadge } from "./HighlightsTab";
-import { Player } from "../player/Player";
+import { Player, TranscriptOnlyNotice } from "../player/Player";
+import { isTranscriptOnly } from "@/lib/capture";
 import { ActionList, actionsToText, transcriptRows } from "./ActionItemsTab";
 import { MeetingContext, type TabId } from "./context";
 import { FollowUpEmailButton } from "./FollowUpEmail";
@@ -62,10 +63,11 @@ function ClipBanner({ meeting, clip }: { meeting: Meeting; clip: SharedClip }) {
 
 function Inner({ meeting, sharePath, clip }: { meeting: Meeting; sharePath: string; clip?: SharedClip }) {
   const store = usePlayerStore();
+  const playback = !isTranscriptOnly(meeting);
   const copy = useCopy();
   const [tab, setTab] = useState<SharedTab>("summary");
   const searchRef = useRef<HTMLInputElement>(null);
-  const seekTo = useCallback((t: number) => store.seek(t, { play: true }), [store]);
+  const seekTo = useCallback((t: number) => playback && store.seek(t, { play: true }), [store, playback]);
   // Shared pages are read-only: seeded highlights, plus the clip being shared.
   const highlights = useMemo(() => {
     const seeded = mergeHighlights(meeting, EMPTY_HIGHLIGHT_STATE);
@@ -76,13 +78,14 @@ function Inner({ meeting, sharePath, clip }: { meeting: Meeting; sharePath: stri
     () => ({
       meeting,
       shared: true,
+      playback,
       tab: tab as TabId,
       setTab: (t: TabId) => setTab(t === "transcript" ? "transcript" : "summary"),
       seekTo,
       searchRef,
       highlights,
     }),
-    [meeting, tab, seekTo, highlights],
+    [meeting, playback, tab, seekTo, highlights],
   );
   useEffect(() => {
     if (clip) {
@@ -92,12 +95,12 @@ function Inner({ meeting, sharePath, clip }: { meeting: Meeting; sharePath: stri
       return;
     }
     const t = Number(new URLSearchParams(location.search).get("t"));
-    if (Number.isFinite(t) && t > 0) (store.seek(t), setTab("transcript"));
-  }, [store, clip]);
+    if (Number.isFinite(t) && t > 0) ((playback && store.seek(t)), setTab("transcript"));
+  }, [store, clip, playback]);
   useKeyboard({
-    " ": () => store.toggle(),
-    ArrowLeft: () => store.skip(-10),
-    ArrowRight: () => store.skip(10),
+    " ": () => playback && store.toggle(),
+    ArrowLeft: () => playback && store.skip(-10),
+    ArrowRight: () => playback && store.skip(10),
     "/": () => {
       if (searchRef.current) return searchRef.current.focus();
       setTab("transcript");
@@ -132,7 +135,7 @@ function Inner({ meeting, sharePath, clip }: { meeting: Meeting; sharePath: stri
                 <AvatarStack ids={meeting.participants} max={8} size={20} />
               </div>
             </div>
-            <Player meeting={meeting} highlights={highlights} />
+            {playback ? <Player meeting={meeting} highlights={highlights} /> : <TranscriptOnlyNotice />}
             <button
               onClick={() => copy(shareUrl(sharePath), "Link copied")}
               className="flex items-center justify-between rounded-md bg-accent/12 px-3 py-2 text-[13px] font-medium text-accent hover:bg-accent/20"

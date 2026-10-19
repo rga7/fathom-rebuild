@@ -11,7 +11,8 @@ import { AvatarStack } from "../Avatar";
 import { IconArrowLeft, IconCalendar, IconChecklist, IconHighlight, IconList, IconPencil, IconQuestion, IconSparkle } from "../icons";
 import { useToast } from "../Toaster";
 import { PlayerProvider, usePlayerStore } from "../player/context";
-import { Player } from "../player/Player";
+import { Player, TranscriptOnlyNotice } from "../player/Player";
+import { isTranscriptOnly } from "@/lib/capture";
 import { ActionItemsTab } from "./ActionItemsTab";
 import { MeetingContext, type TabId } from "./context";
 import { FollowUpEmailButton } from "./FollowUpEmail";
@@ -63,6 +64,7 @@ function Tabs({ tab, setTab, counts }: { tab: TabId; setTab: (t: TabId) => void;
 
 function Inner({ meeting }: { meeting: Meeting }) {
   const store = usePlayerStore();
+  const playback = !isTranscriptOnly(meeting);
   const [tab, setTabState] = useState<TabId>("summary");
 
   const setTab = useCallback((t: TabId) => {
@@ -78,19 +80,19 @@ function Inner({ meeting }: { meeting: Meeting }) {
     const t = Number(new URLSearchParams(location.search).get("t"));
     if (TAB_IDS.includes(hash)) setTabState(hash);
     if (Number.isFinite(t) && t > 0) {
-      store.seek(t);
+      if (playback) store.seek(t);
       if (!TAB_IDS.includes(hash)) setTabState("transcript");
     }
-  }, [store]);
+  }, [store, playback]);
 
-  const seekTo = useCallback((t: number) => store.seek(t, { play: true }), [store]);
+  const seekTo = useCallback((t: number) => playback && store.seek(t, { play: true }), [store, playback]);
   const searchRef = useRef<HTMLInputElement>(null);
   const { highlights, api } = useHighlights(meeting);
   const scratchActions = useScratchpadActions(meeting);
   const toast = useToast();
   const ctx = useMemo(
-    () => ({ meeting, shared: false, tab, setTab, seekTo, searchRef, highlights, highlightApi: api }),
-    [meeting, tab, setTab, seekTo, highlights, api],
+    () => ({ meeting, shared: false, playback, tab, setTab, seekTo, searchRef, highlights, highlightApi: api }),
+    [meeting, playback, tab, setTab, seekTo, highlights, api],
   );
 
   // Timed highlight started from the keyboard (or the H button) during playback.
@@ -100,6 +102,7 @@ function Inner({ meeting }: { meeting: Meeting }) {
   liveRef.current = live;
   const lastType = useRef<HighlightType>("insight");
   const startLive = (type: HighlightType = lastType.current) => {
+    if (!playback) return;
     lastType.current = type;
     setLive({ start: store.time, type, note: "" });
     if (!store.playing) store.play();
@@ -127,9 +130,9 @@ function Inner({ meeting }: { meeting: Meeting }) {
     h: () => (liveRef.current ? endLive() : startLive()),
     "?": () => setHelp(true),
     Escape: () => liveRef.current && setLive(null),
-    " ": () => store.toggle(),
-    ArrowLeft: () => store.skip(-10),
-    ArrowRight: () => store.skip(10),
+    " ": () => playback && store.toggle(),
+    ArrowLeft: () => playback && store.skip(-10),
+    ArrowRight: () => playback && store.skip(10),
     "/": () => {
       if (searchRef.current) return searchRef.current.focus();
       setTab("transcript");
@@ -162,7 +165,11 @@ function Inner({ meeting }: { meeting: Meeting }) {
 
         <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 lg:flex-row">
           <aside className="flex flex-col gap-3 lg:order-2 lg:w-[400px] lg:shrink-0 lg:min-h-0">
-            <Player meeting={meeting} highlights={highlights} toolbar={<HighlightButton live={live} onClick={() => (live ? endLive() : startLive())} />} />
+            {playback ? (
+              <Player meeting={meeting} highlights={highlights} toolbar={<HighlightButton live={live} onClick={() => (live ? endLive() : startLive())} />} />
+            ) : (
+              <TranscriptOnlyNotice />
+            )}
             {live && <LivePanel live={live} setLive={setLive} onEnd={endLive} onCancel={() => setLive(null)} />}
             <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">
               <AskPanel current={meeting} prompts={meeting.suggestedPrompts} onSeek={seekTo} className="min-h-0 flex-1" />

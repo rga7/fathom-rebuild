@@ -11,6 +11,8 @@ export interface MeetingCtx {
   shared: boolean;
   tab: TabId;
   setTab: (t: TabId) => void;
+  /** False for transcript-only calls: no player, so nothing can seek or play. */
+  playback: boolean;
   /** Seek the player to a time and start playing. */
   seekTo: (t: number) => void;
   /** Transcript search box, focused by the "/" shortcut. */

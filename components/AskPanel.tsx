@@ -36,6 +36,7 @@ function AnswerView({ a, current, onCite }: { a: Answer; current?: Meeting; onCi
                     <CiteChip
                       t={p.cite.start}
                       label={p.cite.meetingId === current?.id ? p.cite.topic : `${shortTitle(p.cite.meetingTitle)} › ${p.cite.topic}`}
+                      navigates={p.cite.meetingId !== current?.id}
                       onClick={() => onCite(p.cite!)}
                     />
                   </span>

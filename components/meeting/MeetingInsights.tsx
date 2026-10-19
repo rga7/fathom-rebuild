@@ -1,4 +1,5 @@
 "use client";
+import { NO_RECORDING_TIP } from "@/lib/capture";
 import { person } from "@/data/people";
 import { chapterAt, durationSec, lineStart, talkTime } from "@/lib/derive";
 import { clock, span } from "@/lib/format";
@@ -8,7 +9,7 @@ import { Avatar } from "../Avatar";
 import { useMeeting } from "./context";
 
 export function Chapters() {
-  const { meeting, seekTo } = useMeeting();
+  const { meeting, seekTo, playback } = useMeeting();
   const current = usePlayer((s) => chapterAt(meeting, s.time)?.id);
   const end = durationSec(meeting);
   const starts = meeting.chapters.map((c) => lineStart(meeting, c.startLineId));
@@ -22,7 +23,9 @@ export function Chapters() {
           <li key={c.id}>
             <button
               onClick={() => seekTo(starts[i])}
-              className={`flex w-full items-center gap-2 rounded-md px-1.5 py-1 text-left hover:bg-white/5 ${current === c.id ? "bg-accent/12 text-fg" : "text-zinc-300"}`}
+              disabled={!playback}
+              title={playback ? undefined : NO_RECORDING_TIP}
+              className={`flex w-full items-center gap-2 rounded-md px-1.5 py-1 text-left enabled:hover:bg-white/5 disabled:cursor-default ${current === c.id ? "bg-accent/12 text-fg" : "text-zinc-300"}`}
             >
               <span className={`w-11 shrink-0 text-[12px] tabular-nums ${current === c.id ? "text-accent" : "text-faint"}`}>{clock(starts[i])}</span>
               <span className="min-w-0 flex-1 truncate">{c.title}</span>

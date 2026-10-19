@@ -7,6 +7,7 @@ import { useStored } from "@/lib/storage";
 import { applyVocab, vocabSegments, type VocabEntry } from "@/lib/vocab";
 import { person } from "@/data/people";
 import { activeLineIndex } from "@/lib/derive";
+import { NO_RECORDING_TIP } from "@/lib/capture";
 import { clock } from "@/lib/format";
 import { useCopy, useToast } from "../Toaster";
 import { Avatar } from "../Avatar";
@@ -48,6 +49,7 @@ const TranscriptLine = memo(function TranscriptLine({
   onSeek,
   tint,
   canHighlight,
+  seekable,
   menuOpen,
   onMenu,
   onPick,
@@ -68,6 +70,8 @@ const TranscriptLine = memo(function TranscriptLine({
   /** Colour of a highlight covering this line. */
   tint?: string;
   canHighlight: boolean;
+  /** False for transcript-only calls: lines show their time but cannot seek. */
+  seekable: boolean;
   menuOpen: boolean;
   onMenu: (lineId: string | null) => void;
   onPick: (line: Line, type: HighlightType) => void;
@@ -111,11 +115,11 @@ const TranscriptLine = memo(function TranscriptLine({
   return (
     <div
       data-line={line.id}
-      className={`group/line relative -mx-2 flex cursor-pointer gap-2 rounded-md px-2 py-[3px] ${
+      className={`group/line relative -mx-2 flex ${seekable ? "cursor-pointer" : ""} gap-2 rounded-md px-2 py-[3px] ${
         active ? "bg-accent/15 text-fg" : "text-zinc-300 hover:bg-white/[0.04]"
       }`}
       style={tint && !active ? { background: tint + "14", boxShadow: `inset 2px 0 0 ${tint}` } : undefined}
-      onClick={() => onSeek(line.start)}
+      onClick={seekable ? () => onSeek(line.start) : undefined}
     >
       {canHighlight && (
         <span className="absolute -left-5 top-[3px]">
@@ -216,7 +220,7 @@ const TranscriptLine = memo(function TranscriptLine({
 });
 
 export function TranscriptTab() {
-  const { meeting, seekTo, searchRef, highlights, highlightApi, shared } = useMeeting();
+  const { meeting, seekTo, searchRef, highlights, highlightApi, shared, playback } = useMeeting();
   const [menuFor, setMenuFor] = useState<string | null>(null);
   const copy = useCopy();
   const toast = useToast();
@@ -445,9 +449,15 @@ export function TranscriptTab() {
             <div className="mb-0.5 flex items-center gap-2">
               <Avatar id={turn.speaker} size={20} />
               <span className="text-[13px] font-medium text-muted">{person(turn.speaker).name}</span>
-              <button onClick={() => onSeek(turn.lines[0].start)} className="text-[12px] tabular-nums text-faint hover:text-accent">
-                {clock(turn.lines[0].start)}
-              </button>
+              {playback ? (
+                <button onClick={() => onSeek(turn.lines[0].start)} className="text-[12px] tabular-nums text-faint hover:text-accent">
+                  {clock(turn.lines[0].start)}
+                </button>
+              ) : (
+                <span title={NO_RECORDING_TIP} className="text-[12px] tabular-nums text-faint">
+                  {clock(turn.lines[0].start)}
+                </span>
+              )}
             </div>
             <div className="pl-6">
               {turn.lines.map((l) => (
@@ -461,6 +471,7 @@ export function TranscriptTab() {
                   onSeek={onSeek}
                   tint={tintByLine.get(l.id)}
                   canHighlight={!!highlightApi}
+                  seekable={playback}
                   menuOpen={menuFor === l.id}
                   onMenu={setMenuFor}
                   onPick={onPick}

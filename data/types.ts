@@ -96,12 +96,17 @@ export interface SeedHighlight {
   note?: string;
 }
 
+/** How a call was captured. Transcript-only calls have no recording, so no player. */
+export type CaptureMode = "video" | "audio" | "transcript";
+
 export interface Meeting {
   id: string;
   /** Opaque token for the signed-out /share/[token] page. */
   shareToken: string;
   title: string;
   kind: MeetingKind;
+  /** Absent means a normal (audio) call with the simulated player. */
+  capture?: CaptureMode;
   /** ISO datetime the call started. */
   startedAt: string;
   hostId: PersonId;

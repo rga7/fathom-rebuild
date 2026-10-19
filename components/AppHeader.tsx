@@ -1,8 +1,10 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { FLAGSHIP_HREF } from "@/lib/links";
-import { IconLogo, IconRecord } from "./icons";
+import { CAPTURE_OPTIONS, TRANSCRIPT_ONLY_SAMPLE } from "@/lib/capture";
+import { useCaptureMode } from "@/lib/captureMode";
+import { FLAGSHIP_HREF, meetingHref } from "@/lib/links";
+import { IconCheck, IconLogo, IconRecord } from "./icons";
 import { Modal } from "./Modal";
 
 export function Brand() {
@@ -20,6 +22,7 @@ export function Brand() {
 
 export function CaptureButton() {
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useCaptureMode();
   return (
     <>
       <button
@@ -29,18 +32,35 @@ export function CaptureButton() {
         <IconRecord size={14} className="text-red-400" /> Record a call
       </button>
       {open && (
-        <Modal title="Capture is simulated" onClose={() => setOpen(false)}>
+        <Modal title="Record a call (simulated)" onClose={() => setOpen(false)}>
           <div className="space-y-3 text-[13px] text-muted">
-            <p>
-              This rebuild has <span className="text-fg">no recording bot, desktop capture, or calendar connection</span>. Nothing is recorded and no
-              audio or video is stored.
+            <div role="radiogroup" aria-label="What to capture" className="space-y-2">
+              {CAPTURE_OPTIONS.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={mode === o.id}
+                  onClick={() => setMode(o.id)}
+                  className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left ${mode === o.id ? "border-accent bg-accent/10" : "border-line hover:border-faint"}`}
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-medium text-fg">{o.label}</span>
+                    <span className="block text-[12px]">{o.blurb}</span>
+                  </span>
+                  {mode === o.id && <IconCheck size={16} className="text-accent" />}
+                </button>
+              ))}
+            </div>
+            <p className="text-[12px]" data-testid="capture-honesty">
+              Nothing is recorded in any mode: there is no bot, desktop capture or calendar, and no audio or video is stored. The choice only decides how the sample call opens.
             </p>
-            <p>
-              Every meeting here is seed data: a hand-written transcript with a start time on every line, plus summaries, action items, questions and
-              chapters precomputed at seed time. Playback runs on a simulated clock that drives the transcript.
-            </p>
-            <Link href={FLAGSHIP_HREF} onClick={() => setOpen(false)} className="inline-flex rounded-md bg-accent px-3 py-1.5 font-medium text-white hover:bg-accent-2">
-              Open the 60-minute flagship meeting
+            <Link
+              href={mode === "transcript" ? meetingHref(TRANSCRIPT_ONLY_SAMPLE) : FLAGSHIP_HREF}
+              onClick={() => setOpen(false)}
+              className="inline-flex rounded-md bg-accent px-3 py-1.5 font-medium text-white hover:bg-accent-2"
+            >
+              {mode === "transcript" ? "Open the transcript-only sample call" : "Open the 60-minute flagship meeting"}
             </Link>
           </div>
         </Modal>

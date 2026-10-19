@@ -1,4 +1,5 @@
 "use client";
+import { NO_RECORDING_TIP } from "@/lib/capture";
 import { useMemo, useState } from "react";
 import type { HighlightType } from "@/data/types";
 import { HIGHLIGHT_TYPES } from "@/data/types";
@@ -22,7 +23,7 @@ export function TypeBadge({ type }: { type: HighlightType }) {
 }
 
 function Row({ h }: { h: Highlight }) {
-  const { meeting, highlightApi } = useMeeting();
+  const { meeting, highlightApi, playback } = useMeeting();
   const store = usePlayerStore();
   const copy = useCopy();
   const [editing, setEditing] = useState(false);
@@ -37,7 +38,13 @@ function Row({ h }: { h: Highlight }) {
   return (
     <li className="group py-3" data-highlight={h.id}>
       <div className="flex items-start gap-3">
-        <button onClick={play} aria-label={`Play highlight ${h.title}`} className="mt-0.5 rounded-full bg-white/10 p-1.5 text-fg hover:bg-white/20">
+        <button
+          onClick={play}
+          disabled={!playback}
+          title={playback ? undefined : NO_RECORDING_TIP}
+          aria-label={`Play highlight ${h.title}`}
+          className="mt-0.5 rounded-full bg-white/10 p-1.5 text-fg hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white/10"
+        >
           <IconPlay size={11} />
         </button>
         <div className="min-w-0 flex-1">
@@ -69,6 +76,7 @@ function Row({ h }: { h: Highlight }) {
           {h.note && h.note !== h.title && <p className="mt-1 text-[12px] text-zinc-400">Note: {h.note}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-0.5 opacity-60 group-hover:opacity-100">
+          {playback && (
           <button
             onClick={() => copy(shareUrl(`/share/h/${highlightShareId(meeting, h)}`), "Highlight link copied. Opens signed out at this moment.")}
             aria-label="Copy highlight link"
@@ -77,6 +85,7 @@ function Row({ h }: { h: Highlight }) {
           >
             <IconLink size={14} />
           </button>
+          )}
           {highlightApi && (
             <>
               <button onClick={() => (setDraft(h.title), setEditing(true))} aria-label="Rename highlight" title="Rename" className="rounded p-1.5 text-muted hover:bg-white/5 hover:text-fg">

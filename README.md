@@ -10,7 +10,7 @@ It is an unofficial study project, not affiliated with Fathom. Every person, com
 
 | Area | Status |
 | --- | --- |
-| Recording, bot, desktop capture, calendar | **Stubbed.** Nothing is recorded. "Record a call" opens a dialog that says so. |
+| Recording, bot, desktop capture, calendar | **Stubbed.** Nothing is recorded in any mode. "Record a call" opens a dialog with the three capture modes (Video & Audio, Audio default, Transcript only; remembered in `localStorage`) and says so. The mode only decides which seeded sample call it opens. |
 | Playback | **Simulated.** A `requestAnimationFrame` clock (play/pause, 1x / 1.25x / 1.5x / 2x, scrubber, 10s back/forward) drives the transcript. There is no audio or video. The stage shows who is speaking and the current line as a caption. **Optional spoken playback** (off by default) reads the active line aloud with the browser's `speechSynthesis` voices; see below. |
 | Summaries, action items, questions, chapters, follow-up emails | **Precomputed at seed time** (hand-written in `data/meetings/*.ts`), not generated live. |
 | Ask | **Extractive retrieval** over the seeded transcripts (BM25 in `lib/ask.ts`). No LLM call at runtime. Answers quote transcript lines; some question shapes are answered from seed data (see below). |
@@ -61,6 +61,8 @@ There is no database, API key or `.env`. Every page except viewer-made clip link
 10. **Stretch:** edit any transcript line (with an "edited · revert" tag), custom vocabulary (heard as → should be, with one-click suggestions from each call's seed-time mis-hearings and a dotted underline on fixed words), and scratchpad **@mentions** that become action items with the right owner and a parsed due date ("by Friday", "by Oct 30"), with an @ autocomplete.
 
 **Spoken playback (optional):** a speaker icon next to the speed button turns it on, and a volume slider appears beside it. These are your browser's built-in text-to-speech voices, not the recorded meeting audio. Each participant gets a different English voice (when there are more speakers than voices, voices repeat with a lower pitch). The line that is playing is spoken; speech is cancelled on pause, seek and speed change, and a line that runs long is cut off when the next one starts. The simulated clock never waits for speech, so the two can drift. If `speechSynthesis` is missing, the controls are not rendered. The on/volume choice is kept in `localStorage`. Voice names and quality differ per browser and OS, and Safari only starts speech after a click or key press.
+
+**Capture modes:** Video & Audio only adds "Video & Audio" to the player's "Simulated" label; Audio is the same player. A **transcript-only** call (`capture: "transcript"` in the seed data; the solo sync-engine walkthrough is the one seeded example) has no player or scrubber and shows "Transcript only: no recording saved" instead. Time chips are shown but don't seek (tooltip explains), transcript lines and chapters don't seek, Space/arrows/H do nothing, highlight play and clip links are hidden or disabled, and its `/share/h/…` clip links 404. Summary, action items, questions, transcript, scratchpad and Ask still work.
 
 **Keyboard:** Space play/pause · ←/→ 10s · `/` search · H highlight · 1–7 highlight type · Esc cancel · `?` shortcuts list. Shortcuts are ignored while you type in a field.
 
