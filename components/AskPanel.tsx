@@ -92,7 +92,11 @@ export function AskPanel({
   const nextId = useRef(1);
   const endRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => endRef.current?.scrollIntoView({ block: "end", behavior: "smooth" }), [msgs]);
+  // Block body on purpose: an expression body would return scrollIntoView()'s result,
+  // and some polyfills/extensions make that a Promise, which React rejects as a cleanup.
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+  }, [msgs]);
 
   const submit = async (q: string) => {
     const text = q.trim();

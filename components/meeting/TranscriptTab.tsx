@@ -81,7 +81,9 @@ const TranscriptLine = memo(function TranscriptLine({
   onSaveEdit: (lineId: string, text: string | null) => void;
 }) {
   const [draft, setDraft] = useState(raw);
-  useEffect(() => setDraft(raw), [raw, editing]);
+  useEffect(() => {
+    setDraft(raw);
+  }, [raw, editing]);
   let body: React.ReactNode = vocabSegments(raw, vocab).map((seg, i) =>
     seg.from ? (
       <span key={i} title={`Heard as "${seg.from}" · fixed by your vocabulary`} className="underline decoration-accent/60 decoration-dotted underline-offset-4">
@@ -261,7 +263,9 @@ export function TranscriptTab() {
   }, [matches]);
 
   // New query: start on the first match, so a single hit reads "1 of 1".
-  useEffect(() => setCurrent(0), [query]);
+  useEffect(() => {
+    setCurrent(0);
+  }, [query]);
 
   // Keep the current match in view.
   useEffect(() => {
