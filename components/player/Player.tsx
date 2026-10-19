@@ -9,6 +9,7 @@ import { HIGHLIGHT_META } from "@/lib/highlights";
 import { Avatar } from "../Avatar";
 import { IconBack10, IconFwd10, IconPause, IconPlay } from "../icons";
 import { usePlayer, usePlayerStore } from "./context";
+import { Narrator } from "./Narrator";
 
 function Stage({ meeting }: { meeting: Meeting }) {
   const store = usePlayerStore();
@@ -158,7 +159,7 @@ function TimeLabel() {
   );
 }
 
-export function Controls({ children }: { children?: React.ReactNode }) {
+export function Controls({ meeting, children }: { meeting?: Meeting; children?: React.ReactNode }) {
   const store = usePlayerStore();
   const playing = usePlayer((s) => s.playing);
   const rate = usePlayer((s) => s.rate);
@@ -184,6 +185,7 @@ export function Controls({ children }: { children?: React.ReactNode }) {
       </span>
       <span className="flex-1" />
       {children}
+      {meeting && <Narrator meeting={meeting} />}
       <button
         onClick={store.cycleRate}
         className="min-w-[46px] rounded-md border border-line px-1.5 py-0.5 text-[12px] font-medium tabular-nums text-muted hover:border-faint hover:text-fg"
@@ -202,7 +204,7 @@ export function Player({ meeting, highlights, toolbar }: { meeting: Meeting; hig
       <Stage meeting={meeting} />
       <div className="mt-2 px-0.5">
         <Scrubber meeting={meeting} highlights={highlights} />
-        <Controls>{toolbar}</Controls>
+        <Controls meeting={meeting}>{toolbar}</Controls>
       </div>
     </div>
   );

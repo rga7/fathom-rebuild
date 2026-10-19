@@ -227,3 +227,9 @@ export const IconLogo = (p: P) => (
     <path d="M4 12c3-4 5.5-6 8-6" opacity=".55" />
   </I>
 );
+export const IconSpeaker = ({ muted, ...p }: P & { muted?: boolean }) => (
+  <I {...p}>
+    <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" />
+    {muted ? <path d="m16 9.5 5 5m0-5-5 5" /> : <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />}
+  </I>
+);
