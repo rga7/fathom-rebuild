@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Meeting } from "@/data/types";
 import { durationSec } from "@/lib/derive";
 import { minutes, shortDate, timeOfDay } from "@/lib/format";
@@ -12,6 +12,7 @@ import { ActionItemsTab } from "./ActionItemsTab";
 import { AskPanel } from "./AskPanel";
 import { MeetingContext, type TabId } from "./context";
 import { ScratchpadTab } from "./ScratchpadTab";
+import { useKeyboard } from "./useKeyboard";
 import { SummaryTab } from "./SummaryTab";
 import { TranscriptTab } from "./TranscriptTab";
 
@@ -70,7 +71,19 @@ function Inner({ meeting }: { meeting: Meeting }) {
   }, [store]);
 
   const seekTo = useCallback((t: number) => store.seek(t, { play: true }), [store]);
-  const ctx = useMemo(() => ({ meeting, shared: false, tab, setTab, seekTo }), [meeting, tab, setTab, seekTo]);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const ctx = useMemo(() => ({ meeting, shared: false, tab, setTab, seekTo, searchRef }), [meeting, tab, setTab, seekTo]);
+
+  useKeyboard({
+    " ": () => store.toggle(),
+    ArrowLeft: () => store.skip(-10),
+    ArrowRight: () => store.skip(10),
+    "/": () => {
+      if (searchRef.current) return searchRef.current.focus();
+      setTab("transcript");
+      requestAnimationFrame(() => searchRef.current?.focus());
+    },
+  });
 
   return (
     <MeetingContext.Provider value={ctx}>

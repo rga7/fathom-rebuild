@@ -25,11 +25,14 @@ function Stage({ meeting }: { meeting: Meeting }) {
       aria-label={playing ? "Pause" : "Play"}
       className="group relative block aspect-video w-full overflow-hidden rounded-lg bg-[radial-gradient(ellipse_at_top,#1e2433,#0d0f14_70%)] text-left"
     >
-      <span className="absolute left-2 top-2 rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/70">
-        Simulated playback · no recording
+      <span
+        title="Simulated playback: there is no audio or video. A clock drives the transcript."
+        className="absolute left-2 top-2 rounded bg-black/50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-white/70"
+      >
+        Simulated
       </span>
       {chapterTitle && (
-        <span className="absolute right-2 top-2 max-w-[55%] truncate rounded bg-black/50 px-1.5 py-0.5 text-[11px] text-white/80">{chapterTitle}</span>
+        <span className="absolute right-2 top-2 max-w-[70%] truncate rounded bg-black/50 px-1.5 py-0.5 text-[11px] text-white/80">{chapterTitle}</span>
       )}
       <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 pb-6">
         <span className={`rounded-full p-1 transition-shadow ${playing ? "shadow-[0_0_0_3px_rgba(79,140,255,.55)]" : ""}`}>

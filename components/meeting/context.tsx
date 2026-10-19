@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext } from "react";
+import { createContext, useContext, type RefObject } from "react";
 import type { Meeting } from "@/data/types";
 
 export type TabId = "summary" | "actions" | "transcript" | "highlights" | "questions" | "scratchpad";
@@ -12,6 +12,8 @@ export interface MeetingCtx {
   setTab: (t: TabId) => void;
   /** Seek the player to a time and start playing. */
   seekTo: (t: number) => void;
+  /** Transcript search box, focused by the "/" shortcut. */
+  searchRef: RefObject<HTMLInputElement | null>;
 }
 
 export const MeetingContext = createContext<MeetingCtx | null>(null);
