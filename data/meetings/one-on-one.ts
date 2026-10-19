@@ -22,7 +22,7 @@ export const oneOnOne: Meeting = {
           { lead: "Planning doc", text: "Maya: a neutral doc invites a fight. Jordan will recommend a narrow offline-first scope and state the 14 engineer-month capacity.", cite: A.cap14 },
           { lead: "PM hire", text: "Domain experience is the bigger gap than polish; leaning toward the candidate from the logistics startup.", cite: A.ch_hiring },
           { lead: "Orchard", text: "The iOS draft-loss fix (~2 weeks) may move into the next sprint; Maya to confirm with Dev.", cite: A.ai_confirm_dev },
-          { lead: "Feedback", text: "Two-way feedback on review dynamics and on how sales requests reach the roadmap.", cite: A.ch_feedback },
+          { lead: "Feedback", text: "Jordan told Maya her early architecture comments silenced Priya in a design review; Maya told Jordan they say yes to Marcus's small deal requests too fast.", cite: A.ch_feedback },
         ],
       },
       {

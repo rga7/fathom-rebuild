@@ -1,5 +1,5 @@
 // Values derived from the transcript at runtime, never hard-coded in seed data.
-import type { Line, Meeting, PersonId } from "@/data/types";
+import type { Line, Meeting, PersonId } from "../data/types.ts";
 
 export function durationSec(m: Pick<Meeting, "lines">): number {
   return m.lines.length ? m.lines[m.lines.length - 1].end : 0;

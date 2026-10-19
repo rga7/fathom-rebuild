@@ -103,7 +103,7 @@ Open: should technicians ever see a conflict? I'll write this up with the other 
 
 Sofia`,
   },
-  suggestedPrompts: ["What are the three status pill states?", "How will conflicts work?", "What's still undecided?"],
+  suggestedPrompts: ["What are the three status pill states?", "How will conflicts work?", "What questions are still open?"],
   highlights: [{ id: "hl-dr-feedback", type: "feedback", title: "\"Last checked in\" is more honest", startLineId: "L023", endLineId: A.ai_copy }],
   scratchpad: `- Pill copy final?
 - @Priya send updated dispatcher copy by Friday`,

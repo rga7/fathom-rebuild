@@ -84,7 +84,7 @@ As promised, we'll get back to you by the end of next week.
 Best,
 Jordan`,
   },
-  suggestedPrompts: ["What was Elena's strongest example?", "How does she handle disagreements?", "What did she ask us?"],
+  suggestedPrompts: ["What project is Elena proud of?", "How does she handle disagreements?", "What did she ask us?"],
   highlights: [
     { id: "hl-int-insight", type: "insight", title: "Notes are hard at the right moment, not hard to write", startLineId: "L017", endLineId: A.voice_notes },
     { id: "hl-int-positive", type: "positive", title: "\"SSO is mostly a login screen\"", startLineId: "L031", endLineId: "L032" },

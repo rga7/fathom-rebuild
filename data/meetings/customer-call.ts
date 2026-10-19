@@ -102,7 +102,7 @@ We're also checking whether an interim progress indicator is possible sooner.
 Best,
 Aisha`,
   },
-  suggestedPrompts: ["What is putting the renewal at risk?", "When does the iPad fix ship?", "What did Hana ask for?"],
+  suggestedPrompts: ["What is putting the renewal at risk?", "When does the iPad fix ship?", "What would save Hana time?"],
   highlights: [
     { id: "hl-orch-objection", type: "objection", title: "Renewal at risk in February", startLineId: "L030", endLineId: "L031" },
     { id: "hl-orch-feedback", type: "feedback", title: "Photos fail with no error", startLineId: A.silent_fail, endLineId: A.silent_fail },

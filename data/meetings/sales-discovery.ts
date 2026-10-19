@@ -110,7 +110,7 @@ Next steps
 Best,
 Marcus`,
   },
-  suggestedPrompts: ["What are Brightline's hard security requirements?", "Who is the economic buyer?", "How much time does re-entry cost them?"],
+  suggestedPrompts: ["What are Brightline's hard security requirements?", "Who signs off on the budget?", "How much time does re-entry cost them?"],
   highlights: [
     { id: "hl-bl-insight", type: "insight", title: "Freezers are Faraday cages", startLineId: "L014", endLineId: A.double_entry },
     { id: "hl-bl-objection", type: "objection", title: "Hard requirements: SOC 2, SSO, pen test", startLineId: A.criteria, endLineId: "L043" },
