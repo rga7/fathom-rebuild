@@ -19,7 +19,7 @@ export function NextChip() {
       href={`/#${eventAnchor(next.id)}`}
       data-testid="next-chip"
       onClick={() => window.dispatchEvent(new CustomEvent("cal-focus", { detail: next.id }))}
-      title={`${next.title}: open in Upcoming (simulated calendar)`}
+      title={`${next.title}: open in Upcoming`}
       className="flex max-w-[260px] items-center gap-1.5 rounded-full border border-line bg-panel px-2.5 py-1 text-[12px] text-muted hover:border-faint hover:text-fg"
     >
       <IconClock size={12} className="shrink-0 text-accent" />

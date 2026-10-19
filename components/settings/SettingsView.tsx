@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { CAPTURE_OPTIONS } from "@/lib/capture";
 import { useCaptureMode } from "@/lib/captureMode";
 import { MAX_EVENTS, SCOPE_LABEL, type CaptureScope } from "@/lib/calendar";
-import { FEED_URL_KEY, useCalEvents, useCalSettings, useCalSource, useOverrides } from "@/lib/calendarStore";
+import { DEMO_HIDDEN_KEY, FEED_URL_KEY, useCalEvents, useCalSettings, useCalSource, useOverrides } from "@/lib/calendarStore";
 import { SYNC_ERROR_TEXT, SyncFailure, connectFeed, disconnectFeed, syncNow, useSyncState, type SyncError } from "@/lib/calendarSync";
 import { isPersisted, writeStored } from "@/lib/storage";
 import { ME_NAME } from "@/lib/calendarText";
@@ -114,9 +114,10 @@ function FeedConnect() {
 }
 
 function CalendarSection() {
-  const [source, setSource] = useCalSource();
+  const [, setSource] = useCalSource();
   const [, setOverrides] = useOverrides();
-  const { events } = useCalEvents();
+  // The effective source: with nothing stored this is the default demo calendar.
+  const { source, events } = useCalEvents();
   const sync = useSyncState();
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
@@ -151,6 +152,7 @@ function CalendarSection() {
     setError(null);
     setNote(null);
     writeStored(FEED_URL_KEY, null);
+    writeStored(DEMO_HIDDEN_KEY, null);
     setSource({ kind: "demo" });
     setOverrides({});
   };
@@ -201,19 +203,22 @@ function CalendarSection() {
             )}
             {source.kind === "feed" && events.length === 0 && !sync.error && <p className="text-[12px] text-muted">No meetings in the next 7 days.</p>}
           </div>
-        ) : (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[12px] text-faint">Connect calendar:</span>
-            <button onClick={connectDemo} className="rounded-md bg-accent px-3 py-1.5 font-medium text-white hover:bg-accent-2">
-              Use the demo calendar
-            </button>
+        ) : null}
+        {(!source || source.kind === "demo") && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="text-[12px] text-faint">{source ? "Use your own instead:" : "Connect calendar:"}</span>
+            {!source && (
+              <button onClick={connectDemo} className="rounded-md bg-accent px-3 py-1.5 font-medium text-white hover:bg-accent-2">
+                Use the demo calendar
+              </button>
+            )}
             <label className="cursor-pointer rounded-md border border-line-2 px-3 py-1.5 text-fg hover:border-faint">
               Import an .ics file
               <input ref={fileRef} type="file" accept=".ics,text/calendar" className="sr-only" aria-label="Import an .ics file" onChange={(e) => onFile(e.target.files?.[0])} />
             </label>
           </div>
         )}
-        {!source && <FeedConnect />}
+        {(!source || source.kind === "demo") && <FeedConnect />}
         {error && (
           <p role="alert" className="mt-2 rounded-md bg-red-500/10 px-2.5 py-1.5 text-red-300">
             {error}

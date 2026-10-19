@@ -1,5 +1,5 @@
-// Calendar model for the simulated calendar feature. Nothing here talks to a
-// calendar service: events come from a generated demo calendar or a parsed .ics file.
+// Calendar model. Events come from a generated demo calendar, a parsed .ics file or a private
+// iCal link synced through the server route. Capture itself is simulated.
 import { PEOPLE } from "../data/people.ts";
 
 /** Most events kept from any one calendar source. */

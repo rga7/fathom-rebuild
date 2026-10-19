@@ -4,7 +4,7 @@
 // logged, or put in an error message here.
 import { useSyncExternalStore } from "react";
 import type { CalEvent } from "./calendar";
-import { FEED_URL_KEY } from "./calendarStore";
+import { DEMO_HIDDEN_KEY, FEED_URL_KEY } from "./calendarStore";
 import { isPersisted, readStored, writeStored } from "./storage";
 
 export type SyncError =
@@ -129,7 +129,9 @@ export async function connectFeed(url: string): Promise<{ persisted: boolean }> 
   return { persisted: isPersisted(FEED_URL_KEY) };
 }
 
+/** Removes whatever is connected (link, imported file or demo) and remembers not to bring the demo back. */
 export function disconnectFeed() {
+  writeStored(DEMO_HIDDEN_KEY, true);
   writeStored(FEED_URL_KEY, null);
   writeStored("cal-source", null);
   writeStored("cal-overrides", null);

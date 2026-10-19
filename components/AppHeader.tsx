@@ -54,7 +54,7 @@ export function CaptureButton() {
               ))}
             </div>
             <p className="text-[12px]" data-testid="capture-honesty">
-              Nothing is recorded in any mode: there is no bot, desktop capture or calendar, and no audio or video is stored. The choice only decides how the sample call opens.
+              Nothing is recorded in any mode: there is no bot or desktop capture, and no audio or video is stored. Calendar events can be real; capture is not. The choice only decides how the sample call opens.
             </p>
             <Link
               href={mode === "transcript" ? meetingHref(TRANSCRIPT_ONLY_SAMPLE) : FLAGSHIP_HREF}

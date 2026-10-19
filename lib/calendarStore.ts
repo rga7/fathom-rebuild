@@ -6,6 +6,7 @@ import { DEFAULT_SETTINGS, demoEvents, type CalEvent, type CalSettings, type Cal
 import { useStored } from "./storage";
 
 export const FEED_URL_KEY = "cal-feed-url";
+export const DEMO_HIDDEN_KEY = "cal-demo-hidden";
 const NO_SOURCE: CalSource | null = null;
 const NO_OVERRIDES: Overrides = {};
 
@@ -17,6 +18,11 @@ export function useCalSettings(): [CalSettings, (patch: Partial<CalSettings>) =>
   const settings = useMemo(() => ({ ...DEFAULT_SETTINGS, ...raw }), [raw]);
   return [settings, (patch) => set((p) => ({ ...DEFAULT_SETTINGS, ...p, ...patch }))];
 }
+/** True once the viewer has hidden the demo calendar or disconnected: they get the empty state, not the demo, from then on. */
+export function useDemoHidden() {
+  return useStored<boolean>(DEMO_HIDDEN_KEY, false);
+}
+
 /** The private calendar link. A secret: only ever in this browser's localStorage and in the body of the sync request. */
 export function useFeedUrl() {
   return useStored<string | null>(FEED_URL_KEY, null);
@@ -40,8 +46,13 @@ export function useNow(intervalMs = 30_000): number | null {
   return now;
 }
 
+const DEMO_SOURCE: CalSource = { kind: "demo" };
+
+/** With nothing stored the demo calendar is the default source, until the viewer hides it or disconnects. */
 export function useCalEvents(): { source: CalSource | null; events: CalEvent[] } {
-  const [source] = useCalSource();
+  const [stored] = useCalSource();
+  const [hidden] = useDemoHidden();
+  const source = stored ?? (hidden ? null : DEMO_SOURCE);
   const events = useMemo(() => {
     if (!source) return [];
     return source.kind === "demo" ? demoEvents(getDemoBase()) : source.events;

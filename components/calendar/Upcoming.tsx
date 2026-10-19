@@ -5,6 +5,7 @@ import { captureDecision, countdown, upcoming, type CalEvent } from "@/lib/calen
 import { useCalEvents, useCalSettings, useNow, useOverrides } from "@/lib/calendarStore";
 import { IconClock } from "../icons";
 import { Attendees, PlatformBadge } from "./EventParts";
+import { disconnectFeed } from "@/lib/calendarSync";
 import { CaptureAction } from "./CaptureAction";
 
 export const eventAnchor = (id: string) => `event-${encodeURIComponent(id)}`;
@@ -141,7 +142,7 @@ export function Upcoming() {
         </h2>
         <span className="text-[11px] text-faint">{source
             ? source.kind === "demo"
-              ? "demo calendar (simulated)"
+              ? "demo calendar (generated)"
               : source.kind === "feed"
                 ? `from your calendar link · synced ${new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(source.syncedAt)}`
                 : `from ${source.name}`
@@ -150,13 +151,25 @@ export function Upcoming() {
           Settings
         </Link>
       </div>
+      {source?.kind === "demo" && (
+        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-md border border-accent/30 bg-accent/10 px-3 py-2" data-testid="demo-banner">
+          <span className="min-w-0 flex-1 text-fg">Showing a demo calendar. Connect your own in Settings.</span>
+          <Link href="/settings" className="rounded-md bg-accent px-2.5 py-1 text-[12px] font-medium text-white hover:bg-accent-2">
+            Connect your own
+          </Link>
+          <button onClick={disconnectFeed} className="rounded-md border border-line-2 px-2.5 py-1 text-[12px] text-muted hover:border-faint hover:text-fg">
+            Hide demo
+          </button>
+        </div>
+      )}
       {!source ? (
         <div className="rounded-xl border border-dashed border-line p-4 text-muted" data-testid="upcoming-empty">
-          No calendar connected. Connect the demo calendar or import an .ics file in{" "}
+          No calendar connected. In{" "}
           <Link href="/settings" className="text-accent hover:underline">
             Settings
           </Link>{" "}
-          to see upcoming meetings. Nothing connects to a real calendar service.
+          you can connect your own with a private calendar link, import an .ics file, or bring back the demo calendar. Capture is simulated either way: nothing joins your
+          meetings or records them.
         </div>
       ) : groups.length === 0 ? (
         <div className="rounded-xl border border-dashed border-line p-4 text-muted">No meetings in the next 7 days.</div>
