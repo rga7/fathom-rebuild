@@ -21,7 +21,7 @@ import { HighlightButton, LivePanel, type Live } from "./LiveHighlight";
 import { useHighlights } from "./useHighlights";
 import { QuestionsTab } from "./QuestionsTab";
 import { ShareControls } from "./ShareControls";
-import { ScratchpadTab } from "./ScratchpadTab";
+import { ScratchpadTab, useScratchpadActions } from "./ScratchpadTab";
 import { useKeyboard } from "./useKeyboard";
 import { SummaryTab } from "./SummaryTab";
 import { TranscriptTab } from "./TranscriptTab";
@@ -85,6 +85,7 @@ function Inner({ meeting }: { meeting: Meeting }) {
   const seekTo = useCallback((t: number) => store.seek(t, { play: true }), [store]);
   const searchRef = useRef<HTMLInputElement>(null);
   const { highlights, api } = useHighlights(meeting);
+  const scratchActions = useScratchpadActions(meeting);
   const toast = useToast();
   const ctx = useMemo(
     () => ({ meeting, shared: false, tab, setTab, seekTo, searchRef, highlights, highlightApi: api }),
@@ -161,14 +162,14 @@ function Inner({ meeting }: { meeting: Meeting }) {
             </div>
           </aside>
           <main className="flex min-h-[60vh] min-w-0 flex-1 flex-col rounded-xl border border-line bg-panel lg:order-1 lg:min-h-0">
-            <Tabs tab={tab} setTab={setTab} counts={{ actions: meeting.actionItems.length, highlights: highlights.length, questions: meeting.questions.length }} />
+            <Tabs tab={tab} setTab={setTab} counts={{ actions: meeting.actionItems.length + scratchActions.length, highlights: highlights.length, questions: meeting.questions.length }} />
             <div className="min-h-0 flex-1 overflow-y-auto p-4" id="tab-scroll">
               {tab === "summary" && (
                 <SummaryTab>
                   <MeetingInsights />
                 </SummaryTab>
               )}
-              {tab === "actions" && <ActionItemsTab />}
+              {tab === "actions" && <ActionItemsTab extra={scratchActions} />}
               {tab === "transcript" && <TranscriptTab />}
               {tab === "highlights" && <HighlightsTab />}
               {tab === "questions" && <QuestionsTab />}
