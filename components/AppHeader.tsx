@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CAPTURE_OPTIONS, TRANSCRIPT_ONLY_SAMPLE } from "@/lib/capture";
 import { useCaptureMode } from "@/lib/captureMode";
 import { FLAGSHIP_HREF, meetingHref } from "@/lib/links";
-import { IconCheck, IconLogo, IconRecord } from "./icons";
+import { IconCheck, IconGear, IconLogo, IconRecord } from "./icons";
 import { Modal } from "./Modal";
 
 export function Brand() {
@@ -81,6 +81,9 @@ export function AppHeader({ title }: { title?: string }) {
           Demo · viewing as Jordan Lee
         </span>
         <CaptureButton />
+        <Link href="/settings" aria-label="Settings" title="Settings" className="rounded-md p-1.5 text-muted hover:bg-white/5 hover:text-fg">
+          <IconGear size={16} />
+        </Link>
       </div>
     </header>
   );

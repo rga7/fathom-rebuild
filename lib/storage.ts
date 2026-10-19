@@ -102,3 +102,13 @@ export function useStored<T>(key: string, fallback: T): [T, (next: T | ((prev: T
   );
   return [value, set];
 }
+
+/** True when the value for `key` is really in localStorage (not just the in-memory fallback). */
+export function isPersisted(key: string): boolean {
+  if (storageBroken || typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(PREFIX + key) === (memory.get(key) ?? null);
+  } catch {
+    return false;
+  }
+}
