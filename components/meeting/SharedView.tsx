@@ -1,15 +1,17 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Meeting } from "@/data/types";
+import type { HighlightType, Meeting } from "@/data/types";
+import { EMPTY_HIGHLIGHT_STATE, HIGHLIGHT_META, mergeHighlights } from "@/lib/highlights";
 import { durationSec } from "@/lib/derive";
-import { minutes, shortDate } from "@/lib/format";
+import { clock, minutes, shortDate, span } from "@/lib/format";
 import { AskPanel } from "../AskPanel";
 import { AvatarStack } from "../Avatar";
 import { Brand } from "../AppHeader";
 import { useCopy } from "../Toaster";
-import { IconLink, IconList, IconSparkle } from "../icons";
-import { PlayerProvider, usePlayerStore } from "../player/context";
+import { IconLink, IconList, IconPlay, IconSparkle } from "../icons";
+import { PlayerProvider, usePlayer, usePlayerStore } from "../player/context";
+import { TypeBadge } from "./HighlightsTab";
 import { Player } from "../player/Player";
 import { ActionList, actionsToText, transcriptRows } from "./ActionItemsTab";
 import { MeetingContext, type TabId } from "./context";
@@ -22,20 +24,75 @@ import { useKeyboard } from "./useKeyboard";
 
 type SharedTab = "summary" | "transcript" | "ask";
 
-function Inner({ meeting, sharePath }: { meeting: Meeting; sharePath: string }) {
+export interface SharedClip {
+  id: string;
+  type: HighlightType;
+  start: number;
+  end: number;
+  title: string;
+}
+
+function ClipBanner({ meeting, clip }: { meeting: Meeting; clip: SharedClip }) {
+  const store = usePlayerStore();
+  const inClip = usePlayer((s) => !!s.clip);
+  const meta = HIGHLIGHT_META[clip.type];
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2" style={{ borderColor: meta.color + "55", background: meta.color + "10" }} data-testid="clip-banner">
+      <TypeBadge type={clip.type} />
+      <span className="font-medium text-fg">{clip.title}</span>
+      <span className="text-[12px] tabular-nums text-muted">
+        {clock(clip.start)}–{clock(clip.end)} · {span(clip.end - clip.start)} · from {meeting.title}
+      </span>
+      <span className="flex-1" />
+      <button
+        onClick={() => (store.setClip({ start: clip.start, end: clip.end }), store.seek(clip.start, { play: true }))}
+        className="flex items-center gap-1 rounded-md bg-white px-2 py-1 text-[12px] font-medium text-black hover:bg-white/90"
+      >
+        <IconPlay size={10} /> Play clip
+      </button>
+      {inClip && (
+        <button onClick={() => store.setClip(null)} className="rounded-md border border-line px-2 py-1 text-[12px] text-muted hover:text-fg">
+          Keep watching past the clip
+        </button>
+      )}
+    </div>
+  );
+}
+
+function Inner({ meeting, sharePath, clip }: { meeting: Meeting; sharePath: string; clip?: SharedClip }) {
   const store = usePlayerStore();
   const copy = useCopy();
   const [tab, setTab] = useState<SharedTab>("summary");
   const searchRef = useRef<HTMLInputElement>(null);
   const seekTo = useCallback((t: number) => store.seek(t, { play: true }), [store]);
+  // Shared pages are read-only: seeded highlights, plus the clip being shared.
+  const highlights = useMemo(() => {
+    const seeded = mergeHighlights(meeting, EMPTY_HIGHLIGHT_STATE);
+    if (!clip || seeded.some((h) => h.id === clip.id)) return seeded;
+    return [...seeded, { ...clip, seeded: false }].sort((a, b) => a.start - b.start);
+  }, [meeting, clip]);
   const ctx = useMemo(
-    () => ({ meeting, shared: true, tab: tab as TabId, setTab: (t: TabId) => setTab(t === "transcript" ? "transcript" : "summary"), seekTo, searchRef }),
-    [meeting, tab, seekTo],
+    () => ({
+      meeting,
+      shared: true,
+      tab: tab as TabId,
+      setTab: (t: TabId) => setTab(t === "transcript" ? "transcript" : "summary"),
+      seekTo,
+      searchRef,
+      highlights,
+    }),
+    [meeting, tab, seekTo, highlights],
   );
   useEffect(() => {
+    if (clip) {
+      store.setClip({ start: clip.start, end: clip.end });
+      store.seek(clip.start);
+      setTab("transcript");
+      return;
+    }
     const t = Number(new URLSearchParams(location.search).get("t"));
     if (Number.isFinite(t) && t > 0) (store.seek(t), setTab("transcript"));
-  }, [store]);
+  }, [store, clip]);
   useKeyboard({
     " ": () => store.toggle(),
     ArrowLeft: () => store.skip(-10),
@@ -74,7 +131,7 @@ function Inner({ meeting, sharePath }: { meeting: Meeting; sharePath: string }) 
                 <AvatarStack ids={meeting.participants} max={8} size={20} />
               </div>
             </div>
-            <Player meeting={meeting} />
+            <Player meeting={meeting} highlights={highlights} />
             <button
               onClick={() => copy(shareUrl(sharePath), "Link copied")}
               className="flex items-center justify-between rounded-md bg-accent/12 px-3 py-2 text-[13px] font-medium text-accent hover:bg-accent/20"
@@ -93,7 +150,9 @@ function Inner({ meeting, sharePath }: { meeting: Meeting; sharePath: string }) 
               <ActionList rows={rows} readOnly />
             </div>
           </aside>
-          <main className="flex min-h-[60vh] min-w-0 flex-1 flex-col rounded-xl border border-line bg-panel lg:order-1 lg:min-h-0">
+          <div className="flex min-w-0 flex-1 flex-col gap-3 lg:order-1 lg:min-h-0">
+          {clip && <ClipBanner meeting={meeting} clip={clip} />}
+          <main className="flex min-h-[60vh] min-w-0 flex-1 flex-col rounded-xl border border-line bg-panel lg:min-h-0">
             <div role="tablist" className="flex shrink-0 gap-1 border-b border-line px-2">
               {tabs.map((t) => (
                 <button
@@ -116,16 +175,17 @@ function Inner({ meeting, sharePath }: { meeting: Meeting; sharePath: string }) 
               {tab === "ask" && <AskPanel current={meeting} prompts={meeting.suggestedPrompts} scopes={["this"]} onSeek={seekTo} className="min-h-[60vh] flex-1 border-0" />}
             </div>
           </main>
+          </div>
         </div>
       </div>
     </MeetingContext.Provider>
   );
 }
 
-export function SharedView({ meeting }: { meeting: Meeting }) {
+export function SharedView({ meeting, clip }: { meeting: Meeting; clip?: SharedClip }) {
   return (
     <PlayerProvider duration={durationSec(meeting)}>
-      <Inner meeting={meeting} sharePath={`/share/${meeting.shareToken}`} />
+      <Inner meeting={meeting} sharePath={`/share/${meeting.shareToken}`} clip={clip} />
     </PlayerProvider>
   );
 }

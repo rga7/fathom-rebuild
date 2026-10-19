@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useContext, type RefObject } from "react";
-import type { Meeting } from "@/data/types";
+import type { HighlightType, Meeting } from "@/data/types";
+import type { Highlight } from "@/lib/highlights";
 
 export type TabId = "summary" | "actions" | "transcript" | "highlights" | "questions" | "scratchpad";
 
@@ -14,6 +15,16 @@ export interface MeetingCtx {
   seekTo: (t: number) => void;
   /** Transcript search box, focused by the "/" shortcut. */
   searchRef: RefObject<HTMLInputElement | null>;
+  highlights: Highlight[];
+  /** Absent on shared pages, which are read-only. */
+  highlightApi?: HighlightApi;
+}
+
+export interface HighlightApi {
+  add: (h: { type: HighlightType; start: number; end: number; title?: string; note?: string }) => Highlight;
+  rename: (id: string, title: string) => void;
+  remove: (id: string) => void;
+  restoreSeeded: () => void;
 }
 
 export const MeetingContext = createContext<MeetingCtx | null>(null);

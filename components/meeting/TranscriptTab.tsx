@@ -1,12 +1,14 @@
 "use client";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Line, PersonId } from "@/data/types";
+import type { HighlightType, Line, PersonId } from "@/data/types";
+import { HIGHLIGHT_TYPES } from "@/data/types";
+import { HIGHLIGHT_META } from "@/lib/highlights";
 import { person } from "@/data/people";
 import { activeLineIndex } from "@/lib/derive";
 import { clock } from "@/lib/format";
-import { useCopy } from "../Toaster";
+import { useCopy, useToast } from "../Toaster";
 import { Avatar } from "../Avatar";
-import { IconChevronDown, IconChevronUp, IconCopy, IconSearch, IconX } from "../icons";
+import { IconChevronDown, IconChevronUp, IconCopy, IconPlus, IconSearch, IconX } from "../icons";
 import { usePlayer } from "../player/context";
 import { useMeeting } from "./context";
 
@@ -38,6 +40,11 @@ const TranscriptLine = memo(function TranscriptLine({
   matches,
   currentMatch,
   onSeek,
+  tint,
+  canHighlight,
+  menuOpen,
+  onMenu,
+  onPick,
 }: {
   line: Line;
   text: string;
@@ -46,6 +53,12 @@ const TranscriptLine = memo(function TranscriptLine({
   matches: { m: Match; i: number }[];
   currentMatch: number;
   onSeek: (t: number) => void;
+  /** Colour of a highlight covering this line. */
+  tint?: string;
+  canHighlight: boolean;
+  menuOpen: boolean;
+  onMenu: (lineId: string | null) => void;
+  onPick: (line: Line, type: HighlightType) => void;
 }) {
   let body: React.ReactNode = text;
   if (matches.length) {
@@ -69,8 +82,47 @@ const TranscriptLine = memo(function TranscriptLine({
       className={`group/line relative -mx-2 flex cursor-pointer gap-2 rounded-md px-2 py-[3px] ${
         active ? "bg-accent/15 text-fg" : "text-zinc-300 hover:bg-white/[0.04]"
       }`}
+      style={tint && !active ? { background: tint + "14", boxShadow: `inset 2px 0 0 ${tint}` } : undefined}
       onClick={() => onSeek(line.start)}
     >
+      {canHighlight && (
+        <span className="absolute -left-5 top-[3px]">
+          <button
+            type="button"
+            aria-label="Highlight this line"
+            title="Highlight this line"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMenu(menuOpen ? null : line.id);
+            }}
+            className={`flex h-[18px] w-[18px] items-center justify-center rounded-full border border-accent/60 text-accent hover:bg-accent hover:text-white ${
+              menuOpen ? "bg-accent text-white opacity-100" : "opacity-0 group-hover/line:opacity-100 focus:opacity-100"
+            }`}
+          >
+            <IconPlus size={12} strokeWidth={2.4} />
+          </button>
+          {menuOpen && (
+            <span
+              role="menu"
+              onClick={(e) => e.stopPropagation()}
+              className="absolute left-6 top-0 z-30 block w-44 rounded-lg border border-line-2 bg-raised p-1 shadow-2xl shadow-black/50"
+            >
+              {HIGHLIGHT_TYPES.map((t) => (
+                <button
+                  key={t}
+                  role="menuitem"
+                  onClick={() => onPick(line, t)}
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] font-medium uppercase tracking-wide hover:bg-white/5"
+                  style={{ color: HIGHLIGHT_META[t].color }}
+                >
+                  <span className="h-2 w-2 rounded-sm" style={{ background: HIGHLIGHT_META[t].color }} />
+                  {HIGHLIGHT_META[t].label}
+                </button>
+              ))}
+            </span>
+          )}
+        </span>
+      )}
       <span className={`w-10 shrink-0 pt-[1px] text-right text-[11px] tabular-nums ${active ? "text-accent" : "text-transparent group-hover/line:text-faint"}`}>
         {clock(line.start)}
       </span>
@@ -81,8 +133,10 @@ const TranscriptLine = memo(function TranscriptLine({
 });
 
 export function TranscriptTab() {
-  const { meeting, seekTo, searchRef } = useMeeting();
+  const { meeting, seekTo, searchRef, highlights, highlightApi } = useMeeting();
+  const [menuFor, setMenuFor] = useState<string | null>(null);
   const copy = useCopy();
+  const toast = useToast();
   const [query, setQuery] = useState("");
   const [current, setCurrent] = useState(0);
   const [follow, setFollow] = useState(true);
@@ -151,6 +205,35 @@ export function TranscriptTab() {
     [seekTo],
   );
 
+  // Close the gutter menu on outside click / Escape.
+  useEffect(() => {
+    if (!menuFor) return;
+    const close = () => setMenuFor(null);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    document.addEventListener("click", close);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("click", close);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuFor]);
+
+  const onPick = useCallback(
+    (line: Line, type: HighlightType) => {
+      setMenuFor(null);
+      highlightApi?.add({ type, start: line.start, end: line.end });
+      toast(`${HIGHLIGHT_META[type].label} highlight added`);
+    },
+    [highlightApi, toast],
+  );
+
+  const tintByLine = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const h of highlights)
+      for (const l of lines) if (l.end > h.start + 0.05 && l.start < h.end - 0.05 && !map.has(l.id)) map.set(l.id, HIGHLIGHT_META[h.type].color);
+    return map;
+  }, [highlights, lines]);
+
   const step = (d: number) => matches.length && setCurrent((c) => (c + d + matches.length) % matches.length);
 
   const turns = useMemo(() => {
@@ -218,7 +301,7 @@ export function TranscriptTab() {
                 {clock(turn.lines[0].start)}
               </button>
             </div>
-            <div className="pl-5">
+            <div className="pl-6">
               {turn.lines.map((l) => (
                 <TranscriptLine
                   key={l.id}
@@ -228,6 +311,11 @@ export function TranscriptTab() {
                   matches={byLine.get(l.id) ?? []}
                   currentMatch={byLine.has(l.id) ? current : -1}
                   onSeek={onSeek}
+                  tint={tintByLine.get(l.id)}
+                  canHighlight={!!highlightApi}
+                  menuOpen={menuFor === l.id}
+                  onMenu={setMenuFor}
+                  onPick={onPick}
                 />
               ))}
             </div>

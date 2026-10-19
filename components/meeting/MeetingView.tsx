@@ -1,17 +1,23 @@
 "use client";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Meeting } from "@/data/types";
+import type { HighlightType, Meeting } from "@/data/types";
+import { HIGHLIGHT_TYPES } from "@/data/types";
+import { HIGHLIGHT_META } from "@/lib/highlights";
 import { durationSec } from "@/lib/derive";
-import { minutes, shortDate, timeOfDay } from "@/lib/format";
+import { minutes, shortDate, span, timeOfDay } from "@/lib/format";
 import { AskPanel } from "../AskPanel";
 import { AvatarStack } from "../Avatar";
-import { IconArrowLeft, IconCalendar, IconChecklist, IconList, IconPencil, IconQuestion, IconSparkle } from "../icons";
+import { IconArrowLeft, IconCalendar, IconChecklist, IconHighlight, IconList, IconPencil, IconQuestion, IconSparkle } from "../icons";
+import { useToast } from "../Toaster";
 import { PlayerProvider, usePlayerStore } from "../player/context";
 import { Player } from "../player/Player";
 import { ActionItemsTab } from "./ActionItemsTab";
 import { MeetingContext, type TabId } from "./context";
 import { FollowUpEmailButton } from "./FollowUpEmail";
+import { HighlightsTab } from "./HighlightsTab";
+import { HighlightButton, LivePanel, type Live } from "./LiveHighlight";
+import { useHighlights } from "./useHighlights";
 import { QuestionsTab } from "./QuestionsTab";
 import { ShareControls } from "./ShareControls";
 import { ScratchpadTab } from "./ScratchpadTab";
@@ -26,6 +32,7 @@ function Tabs({ tab, setTab, counts }: { tab: TabId; setTab: (t: TabId) => void;
     { id: "summary", label: "Summary", icon: <IconSparkle size={14} /> },
     { id: "actions", label: "Action Items", icon: <IconChecklist size={14} /> },
     { id: "transcript", label: "Transcript", icon: <IconList size={14} /> },
+    { id: "highlights", label: "Highlights", icon: <IconHighlight size={14} /> },
     { id: "questions", label: "Questions", icon: <IconQuestion size={14} /> },
     { id: "scratchpad", label: "Scratchpad", icon: <IconPencil size={14} /> },
   ];
@@ -76,9 +83,45 @@ function Inner({ meeting }: { meeting: Meeting }) {
 
   const seekTo = useCallback((t: number) => store.seek(t, { play: true }), [store]);
   const searchRef = useRef<HTMLInputElement>(null);
-  const ctx = useMemo(() => ({ meeting, shared: false, tab, setTab, seekTo, searchRef }), [meeting, tab, setTab, seekTo]);
+  const { highlights, api } = useHighlights(meeting);
+  const toast = useToast();
+  const ctx = useMemo(
+    () => ({ meeting, shared: false, tab, setTab, seekTo, searchRef, highlights, highlightApi: api }),
+    [meeting, tab, setTab, seekTo, highlights, api],
+  );
+
+  // Timed highlight started from the keyboard (or the H button) during playback.
+  const [live, setLive] = useState<Live | null>(null);
+  const liveRef = useRef(live);
+  liveRef.current = live;
+  const lastType = useRef<HighlightType>("insight");
+  const startLive = (type: HighlightType = lastType.current) => {
+    lastType.current = type;
+    setLive({ start: store.time, type, note: "" });
+    if (!store.playing) store.play();
+  };
+  const endLive = () => {
+    const l = liveRef.current;
+    if (!l) return;
+    const h = api.add({ type: l.type, start: l.start, end: Math.max(store.time, l.start + 1), note: l.note || undefined });
+    lastType.current = l.type;
+    setLive(null);
+    toast(`${HIGHLIGHT_META[h.type].label} highlight saved (${span(h.end - h.start)})`);
+  };
+  const typeKeys = Object.fromEntries(
+    HIGHLIGHT_TYPES.map((t, i) => [
+      String(i + 1),
+      () => {
+        if (liveRef.current) setLive({ ...liveRef.current, type: t });
+        else if (store.playing) startLive(t);
+      },
+    ]),
+  );
 
   useKeyboard({
+    ...typeKeys,
+    h: () => (liveRef.current ? endLive() : startLive()),
+    Escape: () => liveRef.current && setLive(null),
     " ": () => store.toggle(),
     ArrowLeft: () => store.skip(-10),
     ArrowRight: () => store.skip(10),
@@ -110,17 +153,19 @@ function Inner({ meeting }: { meeting: Meeting }) {
 
         <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 lg:flex-row">
           <aside className="flex flex-col gap-3 lg:order-2 lg:w-[400px] lg:shrink-0 lg:min-h-0">
-            <Player meeting={meeting} />
+            <Player meeting={meeting} highlights={highlights} toolbar={<HighlightButton live={live} onClick={() => (live ? endLive() : startLive())} />} />
+            {live && <LivePanel live={live} setLive={setLive} onEnd={endLive} onCancel={() => setLive(null)} />}
             <div className="hidden min-h-0 flex-1 lg:flex lg:flex-col">
               <AskPanel current={meeting} prompts={meeting.suggestedPrompts} onSeek={seekTo} className="min-h-0 flex-1" />
             </div>
           </aside>
           <main className="flex min-h-[60vh] min-w-0 flex-1 flex-col rounded-xl border border-line bg-panel lg:order-1 lg:min-h-0">
-            <Tabs tab={tab} setTab={setTab} counts={{ actions: meeting.actionItems.length, questions: meeting.questions.length }} />
+            <Tabs tab={tab} setTab={setTab} counts={{ actions: meeting.actionItems.length, highlights: highlights.length, questions: meeting.questions.length }} />
             <div className="min-h-0 flex-1 overflow-y-auto p-4" id="tab-scroll">
               {tab === "summary" && <SummaryTab />}
               {tab === "actions" && <ActionItemsTab />}
               {tab === "transcript" && <TranscriptTab />}
+              {tab === "highlights" && <HighlightsTab />}
               {tab === "questions" && <QuestionsTab />}
               {tab === "scratchpad" && <ScratchpadTab />}
             </div>
